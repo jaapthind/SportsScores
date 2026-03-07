@@ -122,6 +122,20 @@ body,html{width:100vw;height:100vh;overflow:hidden;background:#030407;color:#fff
 .momentum-arrow{font-size:0.8rem;animation:arrowPulse 1s infinite alternate;}
 @keyframes arrowPulse{from{opacity:0.6;}to{opacity:1;}}
 
+
+  .t-score {
+  transition: color 0.6s cubic-bezier(0.23, 1, 0.32, 1), transform 0.2s ease;
+  display: inline-block; /* Required for the scale transform to work well */
+  min-width: 60px; /* Prevents the card from 'jumping' when score digits increase */
+}
+
+/* Enhancing your existing flare */
+@keyframes liquidScorePop {
+  0% { transform: scale(1); color: #fff; }
+  20% { transform: scale(1.4); color: var(--accent-cyan); text-shadow: 0 0 20px var(--accent-cyan); }
+  100% { transform: scale(1); }
+}
+
 /* SEGMENT BAR */
 .segment-bar{display:flex;height:3px;border-radius:4px;overflow:hidden;margin-top:8px;}
 .seg-away{background:var(--accent-cyan);transition:flex 0.8s ease;}
@@ -488,13 +502,25 @@ function sysLog(msg, type="t-sys") {
 // =============================================================================
 async function executePayload() {
   if(isSystemLocked) return;
-  const input=document.getElementById('commandInput');
-  const s=input.value.trim();
+  const input = document.getElementById('commandInput');
+  const s = input.value.trim();
   if(!s){sysLog("ERROR: Null payload.","t-err");return;}
-  sysLog("Executing broadcast...","t-sys");
-  try{ await fetch(TARGET_WEBHOOK,{method:'GET',mode:'no-cors'}); sysLog(`Transmission OK: [${s}]`,"t-scs"); }
-  catch(e){ sysLog("CRITICAL: Bridge refused.","t-err"); }
-  input.value=""; lockSystem();
+
+  sysLog("📡 Checking Uplink status...", "t-sys");
+
+  try {
+    // We fire the transmission
+    await fetch(TARGET_WEBHOOK, { method: 'GET', mode: 'no-cors' });
+    
+    // Since we can't 'see' the response, we log it as 'Sent' 
+    // rather than 'OK' to be technically accurate.
+    sysLog(`Transmission Broadcast: [${s}]`, "t-scs");
+  } catch(e) {
+    sysLog("CRITICAL: Bridge unreachable (Check Cloudflare Tunnel).", "t-err");
+  }
+  
+  input.value = ""; 
+  lockSystem();
 }
 function lockSystem() {
   isSystemLocked=true;
