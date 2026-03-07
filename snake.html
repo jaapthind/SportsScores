@@ -3,202 +3,172 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ULTRADASH // OMEGA MONOLITH</title>
+    <title>ULTRADASH // GOLD MONOLITH</title>
     <style>
         :root {
-            --glass-bg: rgba(12, 18, 28, 0.45);
-            --glass-border: rgba(255, 255, 255, 0.15);
-            --glass-shine: rgba(255, 255, 255, 0.1);
+            --glass-bg: rgba(10, 15, 25, 0.5);
+            --glass-border: rgba(255, 255, 255, 0.12);
+            --glass-shine: rgba(255, 255, 255, 0.08);
             --cyan: #00f3ff;
-            --purple: #9d00ff;
+            --gold: #ffcf40;
             --green: #00ff88;
-            --amber: #ffb700;
+            --magenta: #ff007f;
             --red: #ff3333;
-            --text: #f8fafc;
-            --blur: blur(45px) saturate(200%);
-            --shadow: 0 50px 100px rgba(0,0,0,0.8);
+            --text: #ffffff;
+            --blur: blur(40px) saturate(200%);
             --transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; user-select: none; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'SF Pro Display', sans-serif; user-select: none; }
         body { background: #010203; color: var(--text); overflow: hidden; height: 100vh; position: relative; }
 
         /* =======================================================================
-           1. AMBIENT ENGINE (PARTICLES & LIQUID)
+           1. AMBIENT & REWARD ENGINES
            ======================================================================= */
-        #particleCanvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; pointer-events: none; opacity: 0.6; }
-        .orb { position: absolute; border-radius: 50%; filter: blur(140px); opacity: 0.35; z-index: 0; animation: fluid 25s infinite alternate ease-in-out; }
-        .orb-1 { width: 800px; height: 800px; background: #001f4d; top: -15%; left: -10%; }
-        .orb-2 { width: 600px; height: 600px; background: #3d004d; bottom: -20%; right: -10%; animation-delay: -5s; }
-        @keyframes fluid { 0% { transform: translate(0,0) scale(1); } 100% { transform: translate(150px, 100px) scale(1.15); } }
-
-        /* =======================================================================
-           2. SPRITE ENGINE (SCORING ANIMATIONS)
-           ======================================================================= */
-        #spriteLayer { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 10000; pointer-events: none; overflow: hidden; }
+        #particleCanvas, #rewardCanvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; pointer-events: none; }
+        #rewardCanvas { z-index: 10001; }
         
-        .score-sprite {
-            position: absolute; font-size: 5rem; 
-            filter: drop-shadow(0 0 20px rgba(255,255,255,0.5));
-            animation: streak 2.5s cubic-bezier(0.1, 0.7, 1.0, 0.1) forwards;
-        }
-        @keyframes streak {
-            0% { left: -150px; top: 40%; transform: rotate(0deg) scale(0.5); opacity: 0; }
-            20% { opacity: 1; }
-            80% { opacity: 1; }
-            100% { left: 110vw; top: 30%; transform: rotate(1080deg) scale(2); opacity: 0; }
-        }
+        .ambient-layer { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; overflow: hidden; }
+        .orb { position: absolute; border-radius: 50%; filter: blur(140px); opacity: 0.3; z-index: 0; animation: fluid 25s infinite alternate; }
+        .orb-1 { width: 800px; height: 800px; background: #001f4d; top: -15%; left: -10%; }
+        .orb-2 { width: 600px; height: 600px; background: #3d004d; bottom: -20%; right: -10%; }
+        @keyframes fluid { 0% { transform: translate(0,0) scale(1); } 100% { transform: translate(120px, 80px) scale(1.1); } }
 
         /* =======================================================================
-           3. MASTER GRID & PANELS
+           2. MASTER HEADER & GOLD VAULT
            ======================================================================= */
-        .master-layout {
+        .master-header {
+            position: fixed; top: 0; left: 0; width: 100%; height: 80px;
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 0 40px; z-index: 1000; background: rgba(0,0,0,0.3);
+            backdrop-filter: blur(20px); border-bottom: 1px solid var(--glass-border);
+        }
+        .vault-cluster { display: flex; align-items: center; gap: 15px; background: rgba(255, 207, 64, 0.1); padding: 10px 25px; border-radius: 30px; border: 1px solid var(--gold); box-shadow: 0 0 20px rgba(255, 207, 64, 0.1); }
+        .coin-icon { font-size: 1.5rem; animation: rotateCoin 3s infinite linear; }
+        @keyframes rotateCoin { 0% { transform: rotateY(0deg); } 100% { transform: rotateY(360deg); } }
+        #goldCounter { font-size: 1.4rem; font-weight: 900; color: var(--gold); font-family: 'JetBrains Mono', monospace; }
+
+        /* =======================================================================
+           3. MASTER GRID LAYOUT
+           ======================================================================= */
+        .main-container {
             display: grid; grid-template-columns: 420px 1fr; gap: 25px;
-            padding: 25px; height: 100vh; position: relative; z-index: 10;
+            padding: 100px 25px 25px 25px; height: 100vh; position: relative; z-index: 10;
         }
 
         .liquid-panel {
             background: var(--glass-bg); backdrop-filter: var(--blur); -webkit-backdrop-filter: var(--blur);
             border: 1px solid var(--glass-border); border-top: 1px solid var(--glass-shine);
-            border-radius: 40px; box-shadow: var(--shadow);
-            display: flex; flex-direction: column; overflow: hidden; transition: var(--transition);
+            border-radius: 40px; box-shadow: 0 50px 100px rgba(0,0,0,0.6);
+            display: flex; flex-direction: column; overflow: hidden;
         }
-        .liquid-panel:hover { border-color: rgba(255,255,255,0.3); }
 
-        .header { padding: 35px; border-bottom: 1px solid var(--glass-border); background: rgba(0,0,0,0.3); }
-        .title { font-size: 2rem; font-weight: 900; letter-spacing: -1.5px; background: linear-gradient(90deg, #fff, var(--cyan)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-
-        .body { padding: 30px; overflow-y: auto; flex-grow: 1; display: flex; flex-direction: column; gap: 30px; }
+        .panel-head { padding: 30px; border-bottom: 1px solid var(--glass-border); }
+        .panel-body { padding: 30px; overflow-y: auto; flex-grow: 1; display: flex; flex-direction: column; gap: 30px; }
 
         /* =======================================================================
            4. GOOGLE HOME CONTROL HUB
            ======================================================================= */
-        .glass-input {
-            width: 100%; background: rgba(0,0,0,0.5); border: 1px solid var(--glass-border);
-            color: #fff; padding: 25px; border-radius: 20px; outline: none; transition: 0.3s;
-            font-size: 1.2rem; box-shadow: inset 0 2px 10px rgba(0,0,0,0.5);
+        .input-glass {
+            width: 100%; background: rgba(0,0,0,0.4); border: 1px solid var(--glass-border);
+            color: #fff; padding: 22px; border-radius: 20px; outline: none; font-size: 1.1rem;
         }
-        .glass-input:focus { border-color: var(--cyan); box-shadow: 0 0 30px rgba(0,243,255,0.15); }
-
         .btn-apex {
             background: linear-gradient(135deg, rgba(255,255,255,0.1), transparent);
             border: 1px solid var(--glass-border); color: #fff; padding: 22px;
-            border-radius: 20px; font-weight: 900; cursor: pointer; text-transform: uppercase;
-            letter-spacing: 2px; transition: 0.4s;
+            border-radius: 20px; font-weight: 900; cursor: pointer; text-transform: uppercase; letter-spacing: 2px;
         }
-        .btn-apex:hover:not(:disabled) { background: var(--cyan); color: #000; box-shadow: 0 0 50px var(--cyan); transform: translateY(-5px); }
-        .btn-apex:disabled { opacity: 0.3; cursor: not-allowed; border-color: var(--red); }
+        .btn-apex:hover { background: var(--cyan); color: #000; box-shadow: 0 0 40px var(--cyan); transform: translateY(-3px); }
 
-        /* The Soundboard */
-        .sound-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-        .sb-btn {
-            background: rgba(0,0,0,0.3); border: 1px solid var(--glass-border); color: var(--text);
-            padding: 20px 10px; border-radius: 18px; font-size: 0.8rem; font-weight: 800; cursor: pointer;
-            transition: 0.3s; display: flex; flex-direction: column; align-items: center; gap: 8px;
-        }
-        .sb-btn span { font-size: 1.5rem; }
-        .sb-btn:hover { background: rgba(0,243,255,0.1); color: var(--cyan); border-color: var(--cyan); }
+        .macro-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .m-btn { background: rgba(0,0,0,0.3); border: 1px solid var(--glass-border); color: #888; padding: 18px; border-radius: 15px; font-size: 0.75rem; font-weight: 800; cursor: pointer; text-align: center; }
+        .m-btn:hover { background: rgba(0,243,255,0.1); color: var(--cyan); }
 
         /* =======================================================================
-           5. SPORTS TELEMETRY GRID
+           5. SPORTS & MINI-BETTING ENGINE
            ======================================================================= */
         .matrix-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 25px; }
         
-        .game-card { 
-            background: rgba(255, 255, 255, 0.02); border: 1px solid var(--glass-border); border-radius: 30px; 
-            padding: 30px; transition: 0.4s; cursor: pointer; position: relative;
+        .game-card {
+            background: rgba(255,255,255,0.02); border: 1px solid var(--glass-border);
+            border-radius: 30px; padding: 25px; transition: 0.4s; cursor: pointer; position: relative;
         }
-        .game-card:hover { transform: translateY(-10px); border-color: var(--cyan); background: rgba(255,255,255,0.05); }
+        .game-card:hover { transform: translateY(-8px); border-color: var(--cyan); background: rgba(255,255,255,0.04); }
         
-        .league-id { position: absolute; top: -14px; left: 30px; background: #fff; color: #000; padding: 6px 16px; border-radius: 12px; font-size: 0.8rem; font-weight: 900; }
+        .l-badge { position: absolute; top: -12px; left: 25px; background: #fff; color: #000; padding: 5px 12px; border-radius: 10px; font-size: 0.7rem; font-weight: 900; }
         
-        .team-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .team-meta { display: flex; align-items: center; gap: 20px; }
-        .logo-box { width: 55px; height: 55px; background: #fff; border-radius: 50%; padding: 7px; box-shadow: 0 10px 20px rgba(0,0,0,0.4); }
+        .team-line { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+        .team-meta { display: flex; align-items: center; gap: 15px; }
+        .logo-ring { width: 45px; height: 45px; background: #fff; border-radius: 50%; padding: 5px; }
         .logo-img { width: 100%; height: 100%; object-fit: contain; }
-        .score-val { font-size: 3rem; font-weight: 900; font-family: 'JetBrains Mono', monospace; }
+        .score-val { font-size: 2.2rem; font-weight: 900; font-family: monospace; }
 
-        .game-status { display: flex; justify-content: space-between; margin-top: 25px; padding-top: 20px; border-top: 1px dashed var(--glass-border); font-size: 0.9rem; color: var(--cyan); font-weight: 800; }
-
-        /* Hardware Monitor */
-        .hardware-module { background: rgba(0,0,0,0.3); border-radius: 20px; padding: 25px; border: 1px solid var(--glass-border); }
-        .hw-stat { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 0.85rem; font-weight: 800; }
-        .hw-bar { width: 100%; height: 6px; background: rgba(255,255,255,0.1); border-radius: 10px; overflow: hidden; margin-top: 5px; }
-        .hw-fill { height: 100%; background: var(--cyan); width: 45%; transition: 0.5s; }
+        /* Predictive Section */
+        .bet-node {
+            margin-top: 15px; padding-top: 15px; border-top: 1px dashed var(--glass-border);
+            display: flex; flex-direction: column; gap: 10px;
+        }
+        .bet-label { font-size: 0.7rem; font-weight: 900; color: var(--gold); letter-spacing: 1px; }
+        .bet-options { display: flex; gap: 8px; }
+        .opt-btn { flex: 1; padding: 8px; border-radius: 8px; border: 1px solid var(--glass-border); background: rgba(0,0,0,0.3); color: #fff; font-size: 0.7rem; font-weight: 800; cursor: pointer; transition: 0.2s; }
+        .opt-btn:hover { border-color: var(--gold); color: var(--gold); }
+        .opt-btn.active { background: var(--gold); color: #000; border-color: var(--gold); }
 
         /* =======================================================================
-           6. ANIMATIONS & TERMINAL
+           6. TERMINAL & UTILS
            ======================================================================= */
-        #termLog { background: rgba(0,0,0,0.5); border-radius: 20px; padding: 25px; font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; height: 200px; overflow-y: auto; border: 1px solid var(--glass-border); color: #888; }
-        .t-cyan { color: var(--cyan); }
-        .t-green { color: var(--green); }
+        #termLog { background: rgba(0,0,0,0.5); border-radius: 20px; padding: 20px; font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; height: 180px; overflow-y: auto; color: #666; }
+        .t-cyan { color: var(--cyan); } .t-gold { color: var(--gold); }
 
-        @keyframes scoreFlash { 0% { color: #fff; } 50% { color: var(--green); transform: scale(1.5); text-shadow: 0 0 30px var(--green); } 100% { color: #fff; } }
-        .score-pop { animation: scoreFlash 1.5s ease-out; }
-
-        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
     </style>
 </head>
 <body>
 
-    <div class="ambient-engine">
-        <div class="liquid-orb orb-1"></div>
-        <div class="liquid-orb orb-2"></div>
-    </div>
-    <div id="spriteLayer"></div>
+    <div class="ambient-layer"><div class="orb orb-1"></div><div class="orb orb-2"></div></div>
     <canvas id="particleCanvas"></canvas>
+    <canvas id="rewardCanvas"></canvas>
 
-    <div class="master-layout">
+    <header class="master-header">
+        <div style="font-size: 1.5rem; font-weight: 900; letter-spacing: -1px;">ULTRADASH <span style="color:var(--cyan);">APEX</span></div>
+        <div class="vault-cluster">
+            <span class="coin-icon">🪙</span>
+            <span id="goldCounter">0</span>
+        </div>
+    </header>
+
+    <div class="main-container">
         
         <div class="liquid-panel">
-            <div class="header">
-                <div class="title">Nexus Terminal</div>
-                <div id="clock" style="color: var(--cyan); font-weight: 900; margin-top: 5px;">00:00:00.000</div>
+            <div class="panel-head">
+                <div style="font-size: 1.5rem; font-weight: 900;">Nexus Terminal</div>
+                <div id="clock" style="color:var(--cyan); font-size: 0.9rem; margin-top:5px;">00:00:00.000</div>
             </div>
-            <div class="body">
-                
-                <div style="display: flex; flex-direction: column; gap: 15px;">
-                    <input type="text" id="cmdInput" class="glass-input" placeholder="Initiate broadcast protocol...">
-                    <button class="btn-apex" id="execBtn" onclick="runRelay()">Execute Uplink</button>
-                    <div style="display: flex; justify-content: space-between; font-size: 0.7rem; color: #555; font-weight: 900;">
-                        <span id="bufStatus">BUFFER: READY</span>
-                        <span>COOLDOWN: 30S</span>
-                    </div>
-                    <div class="hw-bar"><div id="bufFill" style="height:100%; width:0%; background:var(--cyan); transition: width 1s linear;"></div></div>
-                </div>
+            <div class="panel-body">
+                <input type="text" id="cmdInput" class="input-glass" placeholder="Transmission payload...">
+                <button class="btn-apex" onclick="runUplink()">Execute Broadcast</button>
 
-                <div class="sound-grid">
-                    <button class="sb-btn" onclick="macro('Attention, it is now bedtime. Lights out.')"><span>🌙</span> Bedtime</button>
-                    <button class="sb-btn" onclick="macro('Dinner is served downstairs. Please come to the table.')"><span>🍕</span> Dinner</button>
-                    <button class="sb-btn" onclick="macro('Study session is starting. Focus mode enabled.')"><span>📚</span> Study</button>
-                    <button class="sb-btn" onclick="macro('Wake up call! Time for Berkeley City College.')"><span>☀️</span> Wake Up</button>
-                    <button class="sb-btn" onclick="macro('Movie night in progress. Please do not disturb.')"><span>🎬</span> Movie</button>
-                    <button class="sb-btn" onclick="macro('Grandpa Kulbir, do you need anything?')"><span>👴</span> Grandpa</button>
-                    <button class="sb-btn" onclick="macro('Security Alert: Movement detected near front door.')"><span>🚨</span> Alert</button>
-                    <button class="sb-btn" onclick="macro('Nexus System is checking diagnostics.')"><span>⚙️</span> Sys Check</button>
-                </div>
-
-                <div class="hardware-module">
-                    <div class="hw-stat"><span>RPI 5 CPU LOAD</span> <span id="cpuVal">42%</span></div>
-                    <div class="hw-bar"><div class="hw-fill" id="cpuBar"></div></div>
-                    <div class="hw-stat" style="margin-top:15px;"><span>CORE TEMP</span> <span id="tempVal" style="color:var(--amber);">48.2°C</span></div>
+                <div class="macro-grid">
+                    <button class="m-btn" onclick="macro('Attention, dinner is ready.')">🍕 Dinner</button>
+                    <button class="m-btn" onclick="macro('Bedtime protocol initiated.')">🌙 Bedtime</button>
+                    <button class="m-btn" onclick="macro('Security Alert: Door Breach.')">🚨 Alert</button>
+                    <button class="m-btn" onclick="macro('Study session starting now.')">📚 Study</button>
                 </div>
 
                 <div id="termLog">
-                    <div>> OMEGA CORE v23.0 LOADED.</div>
-                    <div class="t-cyan">> UPLINK SECURE. ROUTINE ACTIVE.</div>
+                    <div>> OMEGA CORE v24.0 INITIALIZED.</div>
+                    <div class="t-cyan">> GOOGLE ROUTINE SYNC: ACTIVE.</div>
                 </div>
-
             </div>
         </div>
 
         <div class="liquid-panel">
-            <div class="header" style="display: flex; justify-content: space-between; align-items: center;">
-                <div class="title">Omni-Stream Telemetry</div>
-                <div style="font-size: 0.8rem; color: var(--green); font-weight: 900;">● LIVE TRANSMISSION ACTIVE</div>
+            <div class="panel-head" style="display:flex; justify-content:space-between; align-items:center;">
+                <div style="font-size: 1.5rem; font-weight: 900;">Live Telemetry</div>
+                <div style="font-size: 0.75rem; color:var(--green); font-weight:900;">● OMNI-STREAM ONLINE</div>
             </div>
-            <div class="body">
+            <div class="panel-body">
                 <div class="matrix-grid" id="matrix">
                     </div>
             </div>
@@ -207,174 +177,161 @@
     </div>
 
     <script>
-        // 🔴 PASTE WEBHOOK URL HERE 🔴
+        // 🔴 PASTE WEBHOOK 🔴
         const TARGET = "https://pets-hdtv-enormous-objects.trycloudflare.com/endpoint/@scrypted/webhook/public/33/fe2475e0d68cf025/turnOn";
         
-        const COOLDOWN_MS = 30000; 
-        let isLocked = false;
-        let scoreMem = {};
+        let goldVault = 0;
+        let activePredictions = {}; // Stores { gameId: teamId }
+        let scoreTracker = {};
 
-        function addLog(msg, col="") {
+        function addLog(m, c="") {
             const l = document.getElementById('termLog');
-            l.innerHTML += `<div class="${col}">[${new Date().toLocaleTimeString()}] > ${msg}</div>`;
+            l.innerHTML += `<div class="${c}">> ${new Date().toLocaleTimeString()}: ${m}</div>`;
             l.scrollTop = l.scrollHeight;
         }
 
-        async function runRelay() {
-            if(isLocked) return;
-            const input = document.getElementById('cmdInput');
-            const val = input.value.trim();
+        async function runUplink() {
+            const val = document.getElementById('cmdInput').value;
             if(!val) return;
-
-            addLog(`Executing: ${val}`, "t-cyan");
-            
+            addLog(`Uplink: ${val}`, "t-cyan");
             try {
-                // Rapid-Fire Relay to bypass Google latency
                 await fetch(TARGET, { method: 'GET', mode: 'no-cors' });
                 setTimeout(() => fetch(TARGET, { method: 'GET', mode: 'no-cors' }), 400);
-                addLog(`Uplink Confirmed.`, "t-green");
-            } catch(e) { addLog(`Bridge Err: Link Lost.`, "t-red"); }
-
-            input.value = "";
-            startCooldown();
+                addLog(`Success: Broadcast Fired.`);
+            } catch(e) { addLog(`Error: Bridge Lost.`); }
+            document.getElementById('cmdInput').value = "";
         }
 
-        function macro(m) { document.getElementById('cmdInput').value = m; runRelay(); }
+        function macro(m) { document.getElementById('cmdInput').value = m; runUplink(); }
 
-        function startCooldown() {
-            isLocked = true;
-            const btn = document.getElementById('execBtn');
-            const fill = document.getElementById('bufFill');
-            const txt = document.getElementById('bufStatus');
-            
-            btn.disabled = true;
-            fill.style.transition = "none";
-            fill.style.width = "100%";
-            void fill.offsetWidth;
-            fill.style.transition = `width ${COOLDOWN_MS}ms linear`;
-            fill.style.width = "0%";
-
-            let rem = COOLDOWN_MS;
-            const tic = setInterval(() => {
-                rem -= 100;
-                txt.innerText = `BUFFER: ${(rem/1000).toFixed(1)}S`;
-                if(rem <= 0) {
-                    clearInterval(tic);
-                    isLocked = false;
-                    btn.disabled = false;
-                    txt.innerText = "BUFFER: READY";
-                    addLog("Buffer Flushed.");
-                }
-            }, 100);
-        }
-
-        // --- DEEP SPORTS ANALYTICS ---
         const APIS = [
-            { id: "NBA", icon: "🏀", url: "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/scoreboard" },
-            { id: "NCAA", icon: "🏀", url: "https://site.api.espn.com/apis/site/v2/sports/basketball/mens-college-basketball/scoreboard" },
-            { id: "MLB", icon: "⚾", url: "https://site.api.espn.com/apis/site/v2/sports/baseball/mlb/scoreboard" },
-            { id: "NHL", icon: "🏒", url: "https://site.api.espn.com/apis/site/v2/sports/hockey/nhl/scoreboard" },
-            { id: "SOC", icon: "⚽", url: "https://site.api.espn.com/apis/site/v2/sports/soccer/eng.1/scoreboard" }
+            { id: "NBA", url: "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/scoreboard" },
+            { id: "NCAA", url: "https://site.api.espn.com/apis/site/v2/sports/basketball/mens-college-basketball/scoreboard" },
+            { id: "MLB", url: "https://site.api.espn.com/apis/site/v2/sports/baseball/mlb/scoreboard" },
+            { id: "SOC", url: "https://site.api.espn.com/apis/site/v2/sports/soccer/eng.1/scoreboard" }
         ];
 
-        async function updateMatrix() {
-            let list = [];
+        async function pollData() {
+            let dataArr = [];
             for (let api of APIS) {
                 try {
-                    let res = await fetch(api.url); let data = await res.json();
-                    if(data.events) {
-                        data.events.forEach(g => {
-                            if(g.status.type.state === 'in') {
-                                let c = g.competitions[0];
-                                list.push({
-                                    uid: `${api.id}_${g.id}`, l: api.id, icon: api.icon, clock: g.status.type.detail,
-                                    h: { n: c.competitors[0].team.shortDisplayName, s: parseInt(c.competitors[0].score), i: c.competitors[0].team.logo, r: c.competitors[0].records[0].summary },
-                                    a: { n: c.competitors[1].team.shortDisplayName, s: parseInt(c.competitors[1].score), i: c.competitors[1].team.logo, r: c.competitors[1].records[0].summary }
-                                });
-                            }
-                        });
-                    }
+                    let res = await fetch(api.url); let json = await res.json();
+                    json.events.forEach(g => {
+                        if(g.status.type.state === 'in') {
+                            let c = g.competitions[0];
+                            dataArr.push({
+                                id: g.id, l: api.id, clock: g.status.type.detail,
+                                h: { id: c.competitors[0].id, n: c.competitors[0].team.shortDisplayName, s: parseInt(c.competitors[0].score), i: c.competitors[0].team.logo },
+                                a: { id: c.competitors[1].id, n: c.competitors[1].team.shortDisplayName, s: parseInt(c.competitors[1].score), i: c.competitors[1].team.logo }
+                            });
+                        }
+                    });
                 } catch(e){}
             }
-            render(list);
+            render(dataArr);
         }
 
-        function render(data) {
-            const box = document.getElementById('matrix');
-            if(data.length === 0) { box.innerHTML = "<div style='color:#444; font-weight:800;'>NO ACTIVE TRANSMISSIONS.</div>"; return; }
+        function render(games) {
+            const m = document.getElementById('matrix');
+            if(games.length === 0) { m.innerHTML = "AWAITING LIVE DATA..."; return; }
             
-            box.innerHTML = data.map(g => `
+            m.innerHTML = games.map(g => {
+                const pred = activePredictions[g.id] || null;
+                return `
                 <div class="game-card">
-                    <div class="league-id">${g.l}</div>
-                    <div class="team-row">
-                        <div class="team-meta"><div class="logo-box"><img src="${g.a.i}" class="logo-img"></div><strong>${g.a.n}</strong></div>
-                        <div class="score-val" id="s_${g.uid}_a">${g.a.s}</div>
+                    <div class="l-badge">${g.l}</div>
+                    <div class="team-line">
+                        <div class="team-meta"><div class="logo-ring"><img src="${g.a.i}" class="logo-img"></div><strong>${g.a.n}</strong></div>
+                        <div class="score-val" id="s_${g.id}_a">${g.a.s}</div>
                     </div>
-                    <div class="team-row">
-                        <div class="team-meta"><div class="logo-box"><img src="${g.h.i}" class="logo-img"></div><strong>${g.h.n}</strong></div>
-                        <div class="score-val" id="s_${g.uid}_h">${g.h.s}</div>
+                    <div class="team-row team-line">
+                        <div class="team-meta"><div class="logo-ring"><img src="${g.h.i}" class="logo-img"></div><strong>${g.h.n}</strong></div>
+                        <div class="score-val" id="s_${g.id}_h">${g.h.s}</div>
                     </div>
-                    <div class="game-status"><span>${g.a.r} VS ${g.h.r}</span><span>${g.clock}</span></div>
+                    <div class="bet-node">
+                        <div class="bet-label">PREDICT NEXT SCORER (+1 COIN)</div>
+                        <div class="bet-options">
+                            <button class="opt-btn ${pred === 'a' ? 'active' : ''}" onclick="predict('${g.id}', 'a')">${g.a.n}</button>
+                            <button class="opt-btn ${pred === 'h' ? 'active' : ''}" onclick="predict('${g.id}', 'h')">${g.h.n}</button>
+                        </div>
+                    </div>
+                    <div style="text-align:right; font-size:0.75rem; color:var(--cyan); margin-top:10px; font-weight:800;">${g.clock}</div>
                 </div>
-            `).join('');
+            `}).join('');
 
-            data.forEach(g => {
-                // Check for NCAA/NBA Score Animation
-                if(scoreMem[`${g.uid}_a`] && scoreMem[`${g.uid}_a`] < g.a.s) triggerScoreFX(g.l, `s_${g.uid}_a`, g.a.s);
-                if(scoreMem[`${g.uid}_h`] && scoreMem[`${g.uid}_h`] < g.h.s) triggerScoreFX(g.l, `s_${g.uid}_h`, g.h.s);
-                scoreMem[`${g.uid}_a`] = g.a.s; scoreMem[`${g.uid}_h`] = g.h.s;
+            // CHECK WINNERS
+            games.forEach(g => {
+                const prevA = scoreTracker[`${g.id}_a`];
+                const prevH = scoreTracker[`${g.id}_h`];
+                
+                if(prevA !== undefined && g.a.s > prevA) handleScore(g.id, 'a');
+                if(prevH !== undefined && g.h.s > prevH) handleScore(g.id, 'h');
+
+                scoreTracker[`${g.id}_a`] = g.a.s;
+                scoreTracker[`${g.id}_h`] = g.h.s;
             });
         }
 
-        function triggerScoreFX(league, id, val) {
-            const el = document.getElementById(id);
-            if(el) { el.classList.add('score-pop'); setTimeout(() => el.classList.remove('score-pop'), 1500); }
-
-            // SPRITE OVERLAY
-            const layer = document.getElementById('spriteLayer');
-            const sprite = document.createElement('div');
-            sprite.className = 'score-sprite';
-            
-            if(league === "NBA" || league === "NCAA") sprite.innerText = "🏀";
-            else if(league === "MLB") sprite.innerText = "⚾";
-            else if(league === "SOC") sprite.innerText = "⚽";
-            else sprite.innerText = "🔥";
-
-            layer.appendChild(sprite);
-            setTimeout(() => sprite.remove(), 2500);
+        function predict(gameId, side) {
+            activePredictions[gameId] = side;
+            addLog(`Prediction locked: ${side === 'a' ? 'Away' : 'Home'} team to score next.`);
+            pollData(); // Re-render to show active state
         }
 
-        // --- PARTICLE LOGIC ---
-        const canv = document.getElementById('particleCanvas');
-        const ctx = canv.getContext('2d');
+        function handleScore(gameId, scoringSide) {
+            if(activePredictions[gameId] === scoringSide) {
+                goldVault++;
+                document.getElementById('goldCounter').innerText = goldVault;
+                addLog(`JACKPOT! Prediction correct. +1 Gold Coin.`, "t-gold");
+                startGoldRain();
+            }
+            activePredictions[gameId] = null; // Reset prediction for this game
+        }
+
+        // --- REWARD ENGINE (GOLD RAIN) ---
+        const rCanv = document.getElementById('rewardCanvas');
+        const rCtx = rCanv.getContext('2d');
+        let coins = [];
+        function startGoldRain() {
+            rCanv.width = window.innerWidth; rCanv.height = window.innerHeight;
+            for(let i=0; i<50; i++) coins.push({ x: Math.random()*rCanv.width, y: -50, vy: Math.random()*5+5, r: Math.random()*Math.PI*2, vr: Math.random()*0.2 });
+            animateGold();
+        }
+        function animateGold() {
+            rCtx.clearRect(0,0,rCanv.width,rCanv.height);
+            coins.forEach((c, i) => {
+                c.y += c.vy; c.r += c.vr;
+                rCtx.save();
+                rCtx.translate(c.x, c.y);
+                rCtx.rotate(c.r);
+                rCtx.fillStyle = "#ffcf40";
+                rCtx.beginPath(); rCtx.arc(0,0,10,0,Math.PI*2); rCtx.fill();
+                rCtx.restore();
+                if(c.y > rCanv.height) coins.splice(i, 1);
+            });
+            if(coins.length > 0) requestAnimationFrame(animateGold);
+        }
+
+        // --- AMBIENT PARTICLES ---
+        const pCanv = document.getElementById('particleCanvas');
+        const pCtx = pCanv.getContext('2d');
         let pts = [];
-        function init() {
-            canv.width = window.innerWidth; canv.height = window.innerHeight;
-            for(let i=0; i<100; i++) pts.push({ x: Math.random()*canv.width, y: Math.random()*canv.height, s: Math.random()*2, vx: Math.random()*1-0.5, vy: Math.random()*1-0.5 });
+        function initP() {
+            pCanv.width = window.innerWidth; pCanv.height = window.innerHeight;
+            for(let i=0; i<80; i++) pts.push({ x: Math.random()*pCanv.width, y: Math.random()*pCanv.height, s: Math.random()*2, vx: Math.random()*0.4-0.2, vy: Math.random()*0.4-0.2 });
         }
-        function draw() {
-            ctx.clearRect(0,0,canv.width,canv.height); ctx.fillStyle = "rgba(0, 243, 255, 0.4)";
-            pts.forEach(p => { p.x+=p.vx; p.y+=p.vy; if(p.x<0||p.x>canv.width) p.vx*=-1; if(p.y<0||p.y>canv.height) p.vy*=-1; ctx.beginPath(); ctx.arc(p.x, p.y, p.s, 0, Math.PI*2); ctx.fill(); });
-            requestAnimationFrame(draw);
+        function drawP() {
+            pCtx.clearRect(0,0,pCanv.width,pCanv.height); pCtx.fillStyle = "rgba(0, 243, 255, 0.3)";
+            pts.forEach(p => { p.x+=p.vx; p.y+=p.vy; if(p.x<0||p.x>pCanv.width) p.vx*=-1; if(p.y<0||p.y>pCanv.height) p.vy*=-1; pCtx.beginPath(); pCtx.arc(p.x, p.y, p.s, 0, Math.PI*2); pCtx.fill(); });
+            requestAnimationFrame(drawP);
         }
-        init(); draw();
-        
-        // --- HARDWARE SIM ---
-        setInterval(() => {
-            const cpu = (Math.random()*20 + 30).toFixed(0);
-            const temp = (Math.random()*10 + 40).toFixed(1);
-            document.getElementById('cpuVal').innerText = cpu + "%";
-            document.getElementById('cpuBar').style.width = cpu + "%";
-            document.getElementById('tempVal').innerText = temp + "°C";
-            if(temp > 50) document.getElementById('tempVal').style.color = "var(--red)";
-            else document.getElementById('tempVal').style.color = "var(--amber)";
-        }, 2000);
+        initP(); drawP();
 
         setInterval(() => {
             const d = new Date(); document.getElementById('clock').innerText = d.toLocaleTimeString('en-US', {hour12:false}) + "." + d.getMilliseconds();
         }, 50);
         
-        updateMatrix(); setInterval(updateMatrix, 15000);
+        pollData(); setInterval(pollData, 15000);
     </script>
 </body>
 </html>
