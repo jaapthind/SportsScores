@@ -1,156 +1,99 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Virtual Stadium Telemetry Engine</title>
 
 <style>
 
-/* ===============================
-LIQUID GLASS UI
-=============================== */
-
 :root{
---glass:rgba(6,12,18,.82);
 --cyan:#00eaff;
+--glass:rgba(12,18,28,.85);
 --border:rgba(255,255,255,.15);
---blur:blur(70px) saturate(180%);
---mono:'JetBrains Mono',monospace;
-}
-
-*{
-margin:0;
-padding:0;
-box-sizing:border-box;
-font-family:'SF Pro Display',system-ui;
 }
 
 body{
-background:#03050a;
+margin:0;
+background:#05060a;
 color:white;
+font-family:system-ui;
 overflow:hidden;
-height:100vh;
 }
 
-/* ===============================
-HEADER
-=============================== */
+/* HEADER */
 
 header{
 position:fixed;
 top:0;
 left:0;
-width:100%;
-height:90px;
+right:0;
+height:80px;
 display:flex;
 align-items:center;
 justify-content:space-between;
-padding:0 60px;
-background:rgba(0,0,0,.55);
+padding:0 40px;
+background:#000a;
 backdrop-filter:blur(40px);
 border-bottom:1px solid var(--border);
-z-index:500;
-}
-
-.brand{
-font-size:1.9rem;
-font-weight:900;
-letter-spacing:-2px;
 }
 
 .clock{
-font-family:var(--mono);
 color:var(--cyan);
+font-family:monospace;
 }
 
-/* ===============================
-DASHBOARD
-=============================== */
+/* DASHBOARD */
 
 .dashboard{
 position:absolute;
-top:110px;
+top:100px;
 left:40px;
 right:40px;
 bottom:40px;
 display:grid;
-grid-template-columns:440px 1fr;
+grid-template-columns:400px 1fr;
 gap:40px;
 }
 
 .panel{
 background:var(--glass);
+border-radius:30px;
 border:1px solid var(--border);
-border-radius:40px;
-backdrop-filter:var(--blur);
-padding:30px;
+padding:25px;
 overflow:auto;
 }
 
 .matrix{
 display:grid;
-grid-template-columns:repeat(auto-fill,minmax(340px,1fr));
-gap:25px;
+grid-template-columns:repeat(auto-fill,minmax(320px,1fr));
+gap:20px;
 }
 
 .card{
-background:rgba(255,255,255,.05);
+background:#ffffff08;
 border:1px solid var(--border);
-border-radius:25px;
+border-radius:20px;
 padding:20px;
-transition:.3s;
 }
 
-.card:hover{
-border-color:var(--cyan);
-box-shadow:0 0 25px rgba(0,234,255,.4);
+.team{
+display:flex;
+align-items:center;
+gap:10px;
+margin-bottom:10px;
+}
+
+.team img{
+width:40px;
+height:40px;
 }
 
 .score{
-font-size:2.8rem;
+font-size:2rem;
 font-weight:900;
-font-family:var(--mono);
 }
 
-.play{
-font-size:.85rem;
-opacity:.7;
-margin-top:10px;
-}
-
-/* ===============================
-GOOGLE HOME RELAY BOX
-=============================== */
-
-.relay-box{
-margin-top:20px;
-display:flex;
-flex-direction:column;
-gap:10px;
-}
-
-.relay-box input{
-padding:15px;
-border-radius:12px;
-border:none;
-background:#0d1118;
-color:white;
-font-family:var(--mono);
-}
-
-.relay-box button{
-padding:15px;
-border-radius:12px;
-border:none;
-background:var(--cyan);
-font-weight:700;
-cursor:pointer;
-}
-
-/* ===============================
-SHOT THEATER (ISOLATED GPU LAYER)
-=============================== */
+/* SHOT THEATER */
 
 #shotLayer{
 position:fixed;
@@ -158,15 +101,30 @@ top:0;
 left:0;
 width:100%;
 height:100%;
-z-index:10000;
+z-index:1000;
 display:none;
 will-change:transform;
-transform:translateZ(0);
 }
 
 canvas{
 width:100%;
 height:100%;
+}
+
+/* GOOGLE RELAY */
+
+input,button{
+width:100%;
+padding:12px;
+border-radius:10px;
+border:none;
+margin-top:10px;
+}
+
+button{
+background:var(--cyan);
+font-weight:700;
+cursor:pointer;
 }
 
 </style>
@@ -175,7 +133,7 @@ height:100%;
 <body>
 
 <header>
-<div class="brand">Virtual Stadium Engine</div>
+<div>Virtual Stadium Telemetry</div>
 <div id="clock" class="clock"></div>
 </header>
 
@@ -185,15 +143,16 @@ height:100%;
 
 <h3>Google Home Relay</h3>
 
-<div class="relay-box">
-<input id="relayText" placeholder="Broadcast message">
-<button onclick="relay()">Trigger Broadcast</button>
-</div>
+<input id="msg" placeholder="Broadcast command">
+
+<button onclick="relay()">Trigger</button>
 
 </div>
 
 <div class="panel">
+
 <div id="games" class="matrix"></div>
+
 </div>
 
 </div>
@@ -204,112 +163,70 @@ height:100%;
 
 <script>
 
-/* =============================
-ESPN TELEMETRY
-============================= */
+/* CLOCK */
+
+setInterval(()=>{
+let d=new Date()
+clock.innerText=
+d.toLocaleTimeString("en-US",{hour12:false})+
+"."+
+String(d.getMilliseconds()).padStart(3,"0")
+},1)
+
+/* GOOGLE HOME RELAY */
+
+const RELAY="https://pets-hdtv-enormous-objects.trycloudflare.com/endpoint/@scrypted/webhook/public/33/fe2475e0d68cf025/turnOn"
+
+function relay(){
+fetch(RELAY,{method:"GET",mode:"no-cors"})
+setTimeout(()=>fetch(RELAY,{method:"GET",mode:"no-cors"}),400)
+}
+
+/* ESPN TELEMETRY */
 
 const SOURCES=[
-{url:"https://site.api.espn.com/apis/site/v2/sports/basketball/nba/scoreboard"},
-{url:"https://site.api.espn.com/apis/site/v2/sports/basketball/mens-college-basketball/scoreboard"}
+"https://site.api.espn.com/apis/site/v2/sports/basketball/nba/scoreboard",
+"https://site.api.espn.com/apis/site/v2/sports/basketball/mens-college-basketball/scoreboard"
 ]
 
 let scoreCache={}
-
-/* =============================
-CLOCK INTERPOLATION
-============================= */
-
-setInterval(()=>{
-
-let d=new Date()
-
-document.getElementById("clock").innerText=
-d.toLocaleTimeString("en-US",{hour12:false})+"."+String(d.getMilliseconds()).padStart(3,"0")
-
-},1)
-
-/* =============================
-GOOGLE HOME RELAY
-============================= */
-
-const RELAY_URL="https://pets-hdtv-enormous-objects.trycloudflare.com/endpoint/@scrypted/webhook/public/33/fe2475e0d68cf025/turnOn"
-
-function relay(){
-
-fetch(RELAY_URL,{method:"GET",mode:"no-cors"})
-setTimeout(()=>fetch(RELAY_URL,{method:"GET",mode:"no-cors"}),400)
-
-}
-
-/* =============================
-SHOT PARSER
-============================= */
-
-function parseDistance(text){
-
-let m=text.match(/(\d+)[- ]?ft/i)
-
-if(m) return parseInt(m[1])
-
-if(text.includes("three")) return 24
-
-return 12
-
-}
-
-function detectType(text){
-
-text=text.toLowerCase()
-
-if(text.includes("dunk")) return "dunk"
-if(text.includes("layup")) return "layup"
-if(text.includes("three")) return "three"
-
-return "jumper"
-
-}
-
-/* =============================
-FETCH TELEMETRY
-============================= */
 
 async function poll(){
 
 let games=[]
 
-for(let s of SOURCES){
+for(let url of SOURCES){
 
 try{
 
-let r=await fetch(s.url)
+let r=await fetch(url)
 let j=await r.json()
 
 j.events.forEach(e=>{
-
-if(e.status.type.state==="in"){
 
 let c=e.competitions[0]
 
 games.push({
 
 id:e.id,
-clock:e.status.displayClock,
+
 play:c.situation?.lastPlay?.text||"",
+
 athlete:c.situation?.lastPlay?.athletes?.[0]?.id||null,
 
-a:{
+home:{
 name:c.competitors[0].team.shortDisplayName,
+logo:c.competitors[0].team.logo,
 score:+c.competitors[0].score
 },
 
-h:{
+away:{
 name:c.competitors[1].team.shortDisplayName,
+logo:c.competitors[1].team.logo,
 score:+c.competitors[1].score
 }
 
 })
-
-}
 
 })
 
@@ -321,28 +238,32 @@ render(games)
 
 }
 
-setInterval(poll,15000)
+setInterval(poll,12000)
 poll()
 
-/* =============================
-RENDER DASHBOARD
-============================= */
+/* RENDER UI */
 
 function render(games){
 
-let container=document.getElementById("games")
-
-container.innerHTML=games.map(g=>`
+gamesDiv.innerHTML=games.map(g=>`
 
 <div class="card">
 
-<div>${g.a.name}</div>
-<div class="score">${g.a.score}</div>
+<div class="team">
+<img src="${g.away.logo}">
+${g.away.name}
+</div>
 
-<div>${g.h.name}</div>
-<div class="score">${g.h.score}</div>
+<div class="score">${g.away.score}</div>
 
-<div class="play">${g.play}</div>
+<div class="team">
+<img src="${g.home.logo}">
+${g.home.name}
+</div>
+
+<div class="score">${g.home.score}</div>
+
+<div style="opacity:.6">${g.play}</div>
 
 </div>
 
@@ -350,10 +271,12 @@ container.innerHTML=games.map(g=>`
 
 games.forEach(g=>{
 
-if(scoreCache[g.id] && g.h.score>scoreCache[g.id].h){
+if(scoreCache[g.id] && g.home.score>scoreCache[g.id].home.score){
+shotAnimation(g)
+}
 
-launchShot(g)
-
+if(scoreCache[g.id] && g.away.score>scoreCache[g.id].away.score){
+shotAnimation(g)
 }
 
 scoreCache[g.id]=g
@@ -362,9 +285,31 @@ scoreCache[g.id]=g
 
 }
 
-/* =============================
-ARENA ENGINE
-============================= */
+/* SHOT TYPE */
+
+function shotType(text){
+
+text=text.toLowerCase()
+
+if(text.includes("dunk")) return "dunk"
+if(text.includes("layup")) return "layup"
+if(text.includes("three")) return "three"
+
+return "jumper"
+
+}
+
+function shotDistance(text){
+
+let m=text.match(/(\d+)[- ]?ft/i)
+
+if(m) return parseInt(m[1])
+
+return 15
+
+}
+
+/* ARENA ENGINE */
 
 const canvas=document.getElementById("arena")
 const ctx=canvas.getContext("2d")
@@ -372,68 +317,43 @@ const ctx=canvas.getContext("2d")
 canvas.width=innerWidth
 canvas.height=innerHeight
 
-let ballImg=new Image()
-ballImg.src="https://upload.wikimedia.org/wikipedia/commons/7/7a/Basketball.png"
+let ball=new Image()
+ball.src="https://upload.wikimedia.org/wikipedia/commons/7/7a/Basketball.png"
 
-function drawHoop(x,y){
+/* SHOT SIMULATION */
 
-ctx.strokeStyle="#aaa"
-ctx.lineWidth=6
+async function shotAnimation(game){
 
-ctx.beginPath()
-ctx.arc(x,y,40,0,Math.PI*2)
-ctx.stroke()
+shotLayer.style.display="block"
 
-drawNet(x,y)
+let playerImg=null
 
-}
+if(game.athlete){
 
-function drawNet(x,y){
+playerImg=new Image()
 
-for(let i=0;i<10;i++){
-
-let offset=Math.sin(netPhase+i*.5)*6
-
-ctx.beginPath()
-ctx.moveTo(x-30+i*6,y)
-ctx.lineTo(x-20+i*4,y+40+offset)
-ctx.strokeStyle="#ddd"
-ctx.stroke()
-
-}
-
-}
-
-/* =============================
-SHOT SIMULATION
-============================= */
-
-let netPhase=0
-
-async function launchShot(game){
-
-document.getElementById("shotLayer").style.display="block"
-
-let player=new Image()
-
-player.src=
+playerImg.src=
 `https://a.espncdn.com/i/headshots/nba/players/full/${game.athlete}.png`
 
-let dist=parseDistance(game.play)
-let type=detectType(game.play)
+}
+
+let type=shotType(game.play)
+
+let dist=shotDistance(game.play)
 
 let g=9.8
 
 let startX=200
 let startY=canvas.height-200
 
-let hoopX=canvas.width*.8
+let hoopX=canvas.width*.75
 let hoopY=canvas.height*.3
 
-let vx=(hoopX-startX)/90
-let vy=-20-(dist/3)
+let vx=(hoopX-startX)/(90+dist)
 
-let ball={x:startX,y:startY}
+let vy=-18-(dist/4)
+
+let ballPos={x:startX,y:startY}
 
 let frame=0
 
@@ -441,37 +361,46 @@ function animate(){
 
 ctx.clearRect(0,0,canvas.width,canvas.height)
 
-ctx.drawImage(player,startX-120,startY-200,220,220)
+/* PLAYER */
+
+if(playerImg){
+
+ctx.drawImage(playerImg,startX-120,startY-200,200,200)
+
+}
+
+/* LAYUP GLIDE */
 
 if(type==="layup"){
-
-startX+=1.5
-
+startX+=1.2
 }
 
-ball.x+=vx
-ball.y+=vy
-vy+=g*.1
+/* BALL PHYSICS */
 
-ctx.drawImage(ballImg,ball.x,ball.y,40,40)
+ballPos.x+=vx
+ballPos.y+=vy
 
-drawHoop(hoopX,hoopY)
+vy+=g*.12
 
-if(Math.abs(ball.x-hoopX)<15){
+ctx.drawImage(ball,ballPos.x,ballPos.y,40,40)
 
-netPhase+=.4
+/* HOOP */
 
-}
+ctx.beginPath()
+ctx.arc(hoopX,hoopY,40,0,Math.PI*2)
+ctx.strokeStyle="#bbb"
+ctx.lineWidth=6
+ctx.stroke()
 
 frame++
 
-if(frame<180){
+if(frame<200){
 
 requestAnimationFrame(animate)
 
 }else{
 
-document.getElementById("shotLayer").style.display="none"
+shotLayer.style.display="none"
 
 }
 
