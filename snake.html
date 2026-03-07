@@ -2,76 +2,70 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Advanced NBA Game Visualizer</title>
+<title>NBA Game Engine</title>
 
 <style>
 
 body{
-background:#0b0b0b;
+background:#0d0d0d;
 color:white;
 font-family:Arial;
 text-align:center;
 }
 
-#arena{
-position:relative;
-width:900px;
-height:500px;
-margin:auto;
-background:#d48c3a;
-border:6px solid #222;
-border-radius:12px;
-overflow:hidden;
-}
-
-#courtLines{
-position:absolute;
-width:100%;
-height:100%;
-pointer-events:none;
-}
-
-.threeArc{
-position:absolute;
-width:400px;
-height:400px;
-border:3px solid white;
-border-radius:50%;
-left:250px;
-top:50px;
-opacity:0.3;
-}
-
 #scoreboard{
-font-size:32px;
-margin:10px;
+font-size:34px;
+margin-bottom:10px;
 }
 
-.teamLogo{
+.logo{
 width:70px;
-height:70px;
 vertical-align:middle;
 }
 
-.player{
-position:absolute;
-width:40px;
-height:40px;
-background:#ff4444;
-border-radius:50%;
-transition:all 0.5s linear;
+#arena{
+width:1000px;
+margin:auto;
+position:relative;
 }
 
-.ball{
+canvas{
+background:#c68642;
+border:6px solid #222;
+border-radius:10px;
+}
+
+#playlog{
+height:150px;
+overflow:auto;
+background:#111;
+margin-top:10px;
+padding:5px;
+font-size:14px;
+}
+
+button{
+padding:10px;
+font-size:18px;
+margin:10px;
+}
+
+.scoreEffect{
 position:absolute;
-width:15px;
-height:15px;
-background:orange;
-border-radius:50%;
+font-size:70px;
+color:yellow;
+animation:pop 1s forwards;
+}
+
+@keyframes pop{
+0%{transform:scale(0.2);opacity:1}
+100%{transform:scale(2);opacity:0}
 }
 
 .flash{
 position:absolute;
+top:0;
+left:0;
 width:100%;
 height:100%;
 background:white;
@@ -79,66 +73,42 @@ opacity:0;
 pointer-events:none;
 }
 
-.scoreExplosion{
-position:absolute;
-font-size:60px;
-color:yellow;
-animation:explode 1s ease-out;
-}
-
-@keyframes explode{
-0%{transform:scale(0.3);opacity:1;}
-100%{transform:scale(2);opacity:0;}
-}
-
-.replayOverlay{
-position:absolute;
-width:100%;
-height:100%;
-background:rgba(0,0,0,0.7);
-display:none;
-}
-
 </style>
 </head>
 
 <body>
 
-<h1>🏀 Live Game Visualizer</h1>
+<h1>🏀 NBA Game Visualizer</h1>
 
 <div id="scoreboard">
-<img id="logoA" class="teamLogo">
-<span id="teamA">0</span>
+
+<img id="logoA" class="logo">
+<span id="scoreA">0</span>
 
 VS
 
-<span id="teamB">0</span>
-<img id="logoB" class="teamLogo">
+<span id="scoreB">0</span>
+<img id="logoB" class="logo">
+
 </div>
 
 <div id="arena">
 
-<div id="courtLines">
-<div class="threeArc"></div>
-</div>
-
-<div id="ball" class="ball"></div>
+<canvas id="court" width="1000" height="500"></canvas>
 
 <div id="flash" class="flash"></div>
 
-<div id="replay" class="replayOverlay"></div>
-
 </div>
-
-<br>
 
 <button onclick="simulatePlay()">Simulate Play</button>
 
+<div id="playlog"></div>
+
 <script>
 
-///////////////////////////
+////////////////////////////////////////////////
 // TEAM DATA
-///////////////////////////
+////////////////////////////////////////////////
 
 const teams={
 LAL:{
@@ -156,9 +126,9 @@ players:["Stephen Curry","Klay Thompson","Draymond Green"]
 document.getElementById("logoA").src=teams.LAL.logo
 document.getElementById("logoB").src=teams.GSW.logo
 
-///////////////////////////
+////////////////////////////////////////////////
 // GAME STATE
-///////////////////////////
+////////////////////////////////////////////////
 
 let score={
 LAL:0,
@@ -168,16 +138,16 @@ GSW:0
 let stats={
 players:{},
 teams:{
-LAL:{shots:0,threes:0,dunks:0,layups:0},
-GSW:{shots:0,threes:0,dunks:0,layups:0}
+LAL:{points:0,shots:0,threes:0,dunks:0},
+GSW:{points:0,shots:0,threes:0,dunks:0}
 }
 }
 
-///////////////////////////
-// PLAYER INIT
-///////////////////////////
+////////////////////////////////////////////////
+// PLAYER STATS INIT
+////////////////////////////////////////////////
 
-function initPlayers(){
+function initStats(){
 
 teams.LAL.players.forEach(p=>{
 stats.players[p]={pts:0,shots:0,threes:0}
@@ -189,190 +159,319 @@ stats.players[p]={pts:0,shots:0,threes:0}
 
 }
 
-initPlayers()
+initStats()
 
-///////////////////////////
-// PARSE PLAY DESCRIPTION
-///////////////////////////
+////////////////////////////////////////////////
+// CANVAS ENGINE
+////////////////////////////////////////////////
+
+const canvas=document.getElementById("court")
+const ctx=canvas.getContext("2d")
+
+let ball={
+x:100,
+y:400,
+vx:0,
+vy:0
+}
+
+let players=[]
+
+////////////////////////////////////////////////
+// DRAW COURT
+////////////////////////////////////////////////
+
+function drawCourt(){
+
+ctx.clearRect(0,0,canvas.width,canvas.height)
+
+ctx.fillStyle="#c68642"
+ctx.fillRect(0,0,canvas.width,canvas.height)
+
+ctx.strokeStyle="white"
+ctx.lineWidth=4
+
+ctx.beginPath()
+ctx.arc(500,250,80,0,Math.PI*2)
+ctx.stroke()
+
+ctx.beginPath()
+ctx.arc(500,60,240,0,Math.PI)
+ctx.stroke()
+
+}
+
+////////////////////////////////////////////////
+// DRAW PLAYERS
+////////////////////////////////////////////////
+
+function drawPlayers(){
+
+players.forEach(p=>{
+
+ctx.fillStyle=p.team=="LAL"?"purple":"blue"
+
+ctx.beginPath()
+ctx.arc(p.x,p.y,15,0,Math.PI*2)
+ctx.fill()
+
+})
+
+}
+
+////////////////////////////////////////////////
+// DRAW BALL
+////////////////////////////////////////////////
+
+function drawBall(){
+
+ctx.fillStyle="orange"
+
+ctx.beginPath()
+ctx.arc(ball.x,ball.y,8,0,Math.PI*2)
+ctx.fill()
+
+}
+
+////////////////////////////////////////////////
+// PHYSICS UPDATE
+////////////////////////////////////////////////
+
+function updateBall(){
+
+ball.x+=ball.vx
+ball.y+=ball.vy
+
+ball.vy+=0.2
+
+}
+
+////////////////////////////////////////////////
+// RENDER LOOP
+////////////////////////////////////////////////
+
+function render(){
+
+drawCourt()
+drawPlayers()
+drawBall()
+
+updateBall()
+
+requestAnimationFrame(render)
+
+}
+
+render()
+
+////////////////////////////////////////////////
+// PLAYER SETUP
+////////////////////////////////////////////////
+
+function spawnPlayers(){
+
+players=[]
+
+teams.LAL.players.forEach((p,i)=>{
+
+players.push({
+name:p,
+team:"LAL",
+x:200,
+y:150+70*i
+})
+
+})
+
+teams.GSW.players.forEach((p,i)=>{
+
+players.push({
+name:p,
+team:"GSW",
+x:800,
+y:150+70*i
+})
+
+})
+
+}
+
+spawnPlayers()
+
+////////////////////////////////////////////////
+// PLAY PARSER
+////////////////////////////////////////////////
 
 function parsePlay(text){
 
-let result={}
+let player=null
 
-teams.LAL.players.concat(teams.GSW.players).forEach(p=>{
-if(text.includes(p)) result.player=p
+Object.values(teams).forEach(t=>{
+t.players.forEach(p=>{
+if(text.includes(p)) player=p
+})
 })
 
-if(text.includes("3PT")) result.points=3
-else result.points=2
+let distance=text.match(/([0-9]+)ft/)
+distance=distance?parseInt(distance[1]):10
 
-let dist=text.match(/([0-9]+)ft/)
-result.distance=dist?parseInt(dist[1]):10
+let type="jumper"
+if(text.includes("dunk")) type="dunk"
+if(text.includes("layup")) type="layup"
 
-if(text.includes("dunk")) result.type="dunk"
-else if(text.includes("layup")) result.type="layup"
-else result.type="jumper"
+let points=distance>=24?3:2
 
-return result
+return{
+player,
+distance,
+type,
+points
+}
 
 }
 
-///////////////////////////
-// ANIMATION ENGINE
-///////////////////////////
+////////////////////////////////////////////////
+// SHOT ANIMATION
+////////////////////////////////////////////////
 
-function animateShot(data){
+function shootBall(player){
 
-let ball=document.getElementById("ball")
+ball.x=player.x
+ball.y=player.y
 
-let startX=100+Math.random()*600
-let startY=300+Math.random()*150
-
-let hoopX=430
-let hoopY=80
-
-ball.style.left=startX+"px"
-ball.style.top=startY+"px"
-
-setTimeout(()=>{
-ball.style.transition="all 0.8s"
-ball.style.left=hoopX+"px"
-ball.style.top=hoopY+"px"
-},50)
-
-if(data.type=="dunk") dunkEffect()
-if(data.type=="layup") layupEffect()
+ball.vx=(500-ball.x)/30
+ball.vy=-8
 
 }
 
-function dunkEffect(){
+////////////////////////////////////////////////
+// SCORE UPDATE
+////////////////////////////////////////////////
 
-let flash=document.getElementById("flash")
-flash.style.opacity=0.8
+function updateScore(team,points){
 
-setTimeout(()=>{
-flash.style.opacity=0
-},200)
+score[team]+=points
 
-}
-
-function layupEffect(){
-
-let ball=document.getElementById("ball")
-ball.style.transform="scale(1.4)"
-
-setTimeout(()=>{
-ball.style.transform="scale(1)"
-},300)
+document.getElementById("scoreA").innerText=score.LAL
+document.getElementById("scoreB").innerText=score.GSW
 
 }
 
-///////////////////////////
-// CROWD LIGHT FLASH
-///////////////////////////
+////////////////////////////////////////////////
+// CROWD FLASH
+////////////////////////////////////////////////
 
-function crowdFlash(){
+function flashCrowd(){
 
-let flash=document.getElementById("flash")
-flash.style.opacity=0.5
+let f=document.getElementById("flash")
+
+f.style.opacity=0.8
 
 setTimeout(()=>{
-flash.style.opacity=0
+f.style.opacity=0
 },120)
 
 }
 
-///////////////////////////
-// SCORE EXPLOSION
-///////////////////////////
+////////////////////////////////////////////////
+// SCORE EFFECT
+////////////////////////////////////////////////
 
 function scoreExplosion(points){
 
-let arena=document.getElementById("arena")
-
 let e=document.createElement("div")
-e.className="scoreExplosion"
+
+e.className="scoreEffect"
 e.innerText="+"+points
 
-e.style.left="400px"
+e.style.left="450px"
 e.style.top="200px"
 
-arena.appendChild(e)
+document.getElementById("arena").appendChild(e)
 
 setTimeout(()=>e.remove(),1000)
 
 }
 
-///////////////////////////
-// REPLAY
-///////////////////////////
+////////////////////////////////////////////////
+// REPLAY SLOW MOTION
+////////////////////////////////////////////////
 
 function replay(){
 
-let r=document.getElementById("replay")
+let originalVX=ball.vx
+let originalVY=ball.vy
 
-r.style.display="block"
+ball.vx*=0.3
+ball.vy*=0.3
 
 setTimeout(()=>{
-r.style.display="none"
-},2000)
+ball.vx=originalVX
+ball.vy=originalVY
+},1500)
 
 }
 
-///////////////////////////
-// GAME ENGINE
-///////////////////////////
+////////////////////////////////////////////////
+// PLAY LOG
+////////////////////////////////////////////////
+
+function log(text){
+
+let log=document.getElementById("playlog")
+
+log.innerHTML=text+"<br>"+log.innerHTML
+
+}
+
+////////////////////////////////////////////////
+// PLAY SIMULATION
+////////////////////////////////////////////////
 
 function simulatePlay(){
 
 let plays=[
+
 "Stephen Curry 28ft 3PT jumper",
-"LeBron James 5ft dunk",
-"Anthony Davis 7ft layup",
+"LeBron James 4ft dunk",
+"Anthony Davis 6ft layup",
 "Klay Thompson 25ft 3PT jumper"
+
 ]
 
 let play=plays[Math.floor(Math.random()*plays.length)]
 
 let parsed=parsePlay(play)
 
-animateShot(parsed)
+let playerObj=players.find(p=>p.name==parsed.player)
 
-setTimeout(()=>{
+shootBall(playerObj)
 
 let team=teams.LAL.players.includes(parsed.player)?"LAL":"GSW"
 
-score[team]+=parsed.points
+setTimeout(()=>{
+
+updateScore(team,parsed.points)
 
 stats.players[parsed.player].pts+=parsed.points
 stats.players[parsed.player].shots++
 
+stats.teams[team].points+=parsed.points
 stats.teams[team].shots++
 
 if(parsed.points==3) stats.teams[team].threes++
-if(parsed.type=="dunk") stats.teams[team].dunks++
-if(parsed.type=="layup") stats.teams[team].layups++
 
-updateScore()
+if(parsed.type=="dunk") stats.teams[team].dunks++
 
 scoreExplosion(parsed.points)
 
-crowdFlash()
+flashCrowd()
 
 replay()
 
-},900)
+log(play)
 
-}
-
-///////////////////////////
-// SCOREBOARD UPDATE
-///////////////////////////
-
-function updateScore(){
-
-document.getElementById("teamA").innerText=score.LAL
-document.getElementById("teamB").innerText=score.GSW
+},1200)
 
 }
 
