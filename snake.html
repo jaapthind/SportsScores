@@ -3,421 +3,411 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ULTRADASH // OMNI-TRACKER</title>
+    <title>ULTRADASH // LIQUID GLASS EDITION</title>
     <style>
-        /* --- GLOBAL VARIABLES & CSS RESET --- */
+        /* =======================================================================
+           1. CSS VARIABLES & AMBIENT BACKGROUND
+           ======================================================================= */
         :root {
-            --bg-deep: #020203;
-            --panel-bg: #09090b;
-            --neon-blue: #00e5ff;
-            --neon-pink: #ff0055;
+            --glass-bg: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --glass-highlight: rgba(255, 255, 255, 0.15);
+            --neon-blue: #00f3ff;
+            --neon-purple: #bd00ff;
             --neon-green: #00ff66;
-            --neon-yellow: #ffcc00;
-            --alert-red: #ff0000;
-            --text-main: #d1d1d1;
-            --text-dim: #444444;
-            --grid-line: rgba(0, 229, 255, 0.03);
+            --text-main: #f0f0f0;
+            --text-dim: #888899;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; }
         
         body, html {
             width: 100vw; height: 100vh; overflow: hidden;
-            background-color: var(--bg-deep); color: var(--text-main);
-            font-family: 'Consolas', 'Courier New', monospace;
-            background-image: 
-                linear-gradient(var(--grid-line) 1px, transparent 1px),
-                linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
-            background-size: 20px 20px;
+            background-color: #050508; color: var(--text-main);
+            position: relative;
         }
 
-        /* --- HARDWARE ACCELERATED ANIMATIONS --- */
-        @keyframes targetedScorePop {
-            0% { transform: scale(1); color: var(--neon-blue); text-shadow: none; }
-            10% { transform: scale(1.8); color: #ffffff; text-shadow: 0 0 20px #fff, 0 0 40px var(--neon-blue), 0 0 60px var(--neon-blue); }
-            50% { transform: scale(1.3); color: var(--neon-green); text-shadow: 0 0 10px var(--neon-green); }
-            100% { transform: scale(1); color: var(--neon-blue); text-shadow: none; }
+        /* --- AMBIENT GLOWING ORBS (BEHIND THE GLASS) --- */
+        .ambient-orb {
+            position: absolute; border-radius: 50%; filter: blur(80px); z-index: 1;
+            animation: floatOrb 20s infinite alternate ease-in-out; opacity: 0.5;
+        }
+        .orb-1 { width: 400px; height: 400px; background: var(--neon-blue); top: -100px; left: -100px; }
+        .orb-2 { width: 500px; height: 500px; background: var(--neon-purple); bottom: -150px; right: -100px; animation-delay: -5s; }
+        .orb-3 { width: 300px; height: 300px; background: var(--neon-green); top: 50%; left: 50%; transform: translate(-50%, -50%); animation-delay: -10s; opacity: 0.2; }
+
+        @keyframes floatOrb {
+            0% { transform: translate(0, 0) scale(1); }
+            50% { transform: translate(50px, 50px) scale(1.1); }
+            100% { transform: translate(-50px, 20px) scale(0.9); }
         }
 
-        @keyframes cardPulseBorder {
-            0% { border-color: #333; box-shadow: none; }
-            20% { border-color: var(--neon-blue); box-shadow: 0 0 30px rgba(0, 229, 255, 0.5) inset; }
-            100% { border-color: #333; box-shadow: none; }
+        /* =======================================================================
+           2. LIQUID GLASS MASTER LAYOUT
+           ======================================================================= */
+        .glass-wrapper {
+            display: flex; width: 100vw; height: 100vh; position: relative; z-index: 10;
+            padding: 20px; gap: 20px;
         }
 
-        @keyframes scanlineSweep {
-            0% { transform: translateY(-100vh); }
-            100% { transform: translateY(100vh); }
+        .glass-panel {
+            background: var(--glass-bg);
+            backdrop-filter: blur(24px) saturate(150%);
+            -webkit-backdrop-filter: blur(24px) saturate(150%);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            display: flex; flex-direction: column; overflow: hidden;
         }
 
-        .score-updated {
-            display: inline-block;
-            animation: targetedScorePop 2.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-            font-weight: 900;
-        }
-
-        .card-updated {
-            animation: cardPulseBorder 2.5s ease-out forwards;
-        }
-
-        .scanline {
-            position: absolute; top: 0; left: 0; width: 100vw; height: 10vh;
-            background: linear-gradient(to bottom, transparent, rgba(0, 229, 255, 0.1), transparent);
-            opacity: 0.5; pointer-events: none; z-index: 9999;
-            animation: scanlineSweep 8s linear infinite;
-        }
-
-        /* --- SPLIT SCREEN ARCHITECTURE --- */
-        .wrapper { display: flex; width: 100vw; height: 100vh; position: relative; z-index: 10; }
+        /* --- LEFT COLUMN: PROFESSIONAL BROADCAST CHAT --- */
+        .left-col { width: 35%; padding: 30px; position: relative; }
         
-        .panel { background: var(--panel-bg); height: 100%; display: flex; flex-direction: column; }
+        .header-container { margin-bottom: 30px; }
+        .header-title { font-size: 1.8rem; font-weight: 800; background: linear-gradient(90deg, #fff, var(--text-dim)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: -0.5px; }
+        .header-sub { font-size: 0.85rem; color: var(--neon-blue); font-weight: 600; text-transform: uppercase; letter-spacing: 2px; margin-top: 5px; }
+
+        /* Liquid Glass Input Form */
+        .input-group { display: flex; flex-direction: column; gap: 15px; position: relative; }
         
-        /* LEFT: COMMAND & CONTROL */
-        .left-col { 
-            width: 35%; border-right: 1px solid #222; 
-            box-shadow: 10px 0 30px rgba(0,0,0,0.9); z-index: 50;
+        .glass-input {
+            width: 100%; background: rgba(0, 0, 0, 0.2); border: 1px solid var(--glass-border);
+            color: #fff; padding: 20px 24px; font-size: 1.1rem; border-radius: 16px;
+            outline: none; transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.3);
         }
+        .glass-input:focus {
+            border-color: var(--neon-blue); background: rgba(0, 0, 0, 0.4);
+            box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.3), 0 0 20px rgba(0, 243, 255, 0.2);
+        }
+        .glass-input::placeholder { color: rgba(255, 255, 255, 0.3); }
+
+        .glass-btn {
+            background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.0));
+            border: 1px solid var(--glass-highlight); color: #fff;
+            padding: 20px; font-size: 1.1rem; font-weight: 700; border-radius: 16px;
+            cursor: pointer; transition: all 0.3s ease;
+            backdrop-filter: blur(10px); text-transform: uppercase; letter-spacing: 1px;
+            position: relative; overflow: hidden;
+        }
+        .glass-btn::before {
+            content: ''; position: absolute; top: 0; left: -100%; width: 50%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s ease;
+        }
+        .glass-btn:hover:not(:disabled) { border-color: var(--neon-blue); box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3); transform: translateY(-2px); }
+        .glass-btn:hover:not(:disabled)::before { left: 150%; }
+        .glass-btn:active:not(:disabled) { transform: translateY(1px); }
+        .glass-btn:disabled { opacity: 0.5; cursor: not-allowed; border-color: var(--alert-red); }
+
+        /* Status & Buffer Visuals */
+        .status-container { margin-top: 10px; display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem; font-weight: 600; }
+        .buffer-track { width: 100%; height: 6px; background: rgba(0,0,0,0.3); border-radius: 10px; margin-top: 15px; overflow: hidden; border: 1px solid var(--glass-border); }
+        .buffer-fill { height: 100%; width: 0%; background: linear-gradient(90deg, var(--neon-purple), var(--neon-blue)); border-radius: 10px; transition: width 1s linear; }
+
+        .console-glass {
+            flex-grow: 1; margin-top: 30px; background: rgba(0,0,0,0.2); border-radius: 16px;
+            border: 1px solid var(--glass-border); padding: 20px; overflow-y: auto; font-family: 'Consolas', monospace; font-size: 0.85rem;
+        }
+        .log-entry { margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .log-time { color: var(--text-dim); margin-right: 10px; }
+        .log-msg.success { color: var(--neon-green); }
+        .log-msg.error { color: var(--alert-red); }
+
+        /* --- RIGHT COLUMN: LIVE SPORTS GRID --- */
+        .right-col { width: 65%; padding: 30px; overflow-y: auto; }
         
-        .sys-header {
-            padding: 25px; border-bottom: 1px solid #222;
-            background: linear-gradient(180deg, #111, transparent);
-        }
-        .sys-header h1 { color: var(--neon-pink); font-size: 1.4rem; letter-spacing: 4px; text-transform: uppercase; }
-        .clock-display { font-size: 1.2rem; color: var(--text-dim); margin-top: 10px; font-weight: bold; }
+        .live-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+        .live-title { font-size: 2rem; font-weight: 800; }
+        .live-badge { background: rgba(0, 255, 102, 0.1); border: 1px solid var(--neon-green); color: var(--neon-green); padding: 6px 16px; border-radius: 30px; font-size: 0.8rem; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+        .pulse-dot { width: 8px; height: 8px; background: var(--neon-green); border-radius: 50%; box-shadow: 0 0 10px var(--neon-green); animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
 
-        .comm-module { padding: 25px; display: flex; flex-direction: column; gap: 15px; }
-        .comm-input {
-            width: 100%; background: #000; border: 1px solid #333; color: var(--neon-blue);
-            padding: 18px; font-family: inherit; font-size: 1.1rem; outline: none; transition: 0.3s;
-        }
-        .comm-input:focus { border-color: var(--neon-pink); box-shadow: inset 0 0 10px rgba(255, 0, 85, 0.2); }
+        .sports-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
         
-        .btn-override {
-            background: #111; color: var(--text-main); border: 1px solid #444; padding: 18px;
-            font-family: inherit; font-weight: bold; font-size: 1.2rem; cursor: pointer; text-transform: uppercase;
+        .glass-card {
+            background: rgba(255, 255, 255, 0.02); border: 1px solid var(--glass-border);
+            border-radius: 20px; padding: 24px; position: relative; transition: all 0.3s ease;
         }
-        .btn-override:hover:not(:disabled) { background: var(--neon-pink); color: #fff; border-color: var(--neon-pink); box-shadow: 0 0 20px rgba(255,0,85,0.4); }
-        .btn-override:disabled { background: #050505; color: #333; border-color: #222; cursor: not-allowed; }
-
-        .buffer-track { width: 100%; height: 4px; background: #111; margin-top: 5px; position: relative; }
-        .buffer-fill { height: 100%; width: 0%; background: var(--alert-red); transition: width 1s linear; }
-
-        .console-output {
-            flex-grow: 1; background: #020202; border-top: 1px solid #222; padding: 20px;
-            overflow-y: auto; font-size: 0.85rem; display: flex; flex-direction: column; gap: 8px;
-        }
-        .term-line { border-left: 2px solid #333; padding-left: 12px; }
-        .term-info { color: #888; }
-        .term-exec { color: var(--neon-green); border-left-color: var(--neon-green); }
-        .term-alert { color: var(--neon-yellow); border-left-color: var(--neon-yellow); }
-
-        /* RIGHT: LIVE TELEMETRY */
-        .right-col { width: 65%; padding: 30px; overflow-y: auto; position: relative; }
+        .glass-card:hover { background: rgba(255, 255, 255, 0.05); border-color: var(--glass-highlight); transform: translateY(-3px); }
         
-        .telemetry-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 30px; border-bottom: 1px solid #222; padding-bottom: 15px; }
-        .telemetry-header h2 { font-size: 2.2rem; color: #fff; letter-spacing: 2px; }
-        .live-indicator { display: flex; align-items: center; gap: 10px; color: var(--neon-green); font-weight: bold; }
-        .pulse-dot { width: 10px; height: 10px; background: var(--neon-green); border-radius: 50%; animation: pulseOpacity 1s infinite; }
-        @keyframes pulseOpacity { 0%, 100% { opacity: 1; box-shadow: 0 0 10px var(--neon-green); } 50% { opacity: 0.2; box-shadow: none; } }
-
-        .sports-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 25px; }
-        
-        .game-node {
-            background: #0a0a0c; border: 1px solid #333; padding: 25px;
-            border-radius: 6px; position: relative; display: flex; flex-direction: column; gap: 15px;
-        }
-        
-        .league-tag {
-            position: absolute; top: -12px; left: 15px; background: #fff; color: #000;
-            padding: 4px 12px; font-weight: 900; font-size: 0.8rem; border-radius: 2px;
+        .league-pill {
+            position: absolute; top: -12px; left: 24px; background: #fff; color: #000;
+            padding: 4px 12px; border-radius: 10px; font-size: 0.75rem; font-weight: 800; letter-spacing: 1px;
         }
 
-        .team-block { display: flex; justify-content: space-between; align-items: center; }
-        .team-name { font-size: 1.4rem; font-weight: bold; color: #ccc; }
-        .team-score { font-size: 2.2rem; font-weight: bold; color: var(--neon-blue); font-family: Impact, sans-serif; transition: color 0.3s; }
+        .team-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+        .team-name { font-size: 1.3rem; font-weight: 700; color: #ddd; }
+        .team-score { font-size: 2.2rem; font-weight: 900; color: #fff; transition: color 0.3s; }
         
-        .clock-block { text-align: right; border-top: 1px dashed #333; padding-top: 12px; font-size: 0.9rem; color: var(--neon-yellow); font-weight: bold; }
+        .game-clock { text-align: right; font-size: 0.85rem; color: var(--neon-blue); font-weight: 600; margin-top: 15px; padding-top: 15px; border-top: 1px solid var(--glass-border); }
 
-        .no-games { grid-column: 1 / -1; text-align: center; padding: 50px; color: var(--text-dim); font-size: 1.5rem; letter-spacing: 2px; border: 1px dashed #333; }
+        .no-games { grid-column: 1 / -1; text-align: center; padding: 60px; font-size: 1.2rem; color: var(--text-dim); background: rgba(0,0,0,0.2); border-radius: 20px; border: 1px dashed var(--glass-border); }
 
-        ::-webkit-scrollbar { width: 4px; }
+        /* Hardware Accelerated Score Pop */
+        @keyframes scoreGlassPop {
+            0% { transform: scale(1); color: #fff; }
+            20% { transform: scale(1.5); color: var(--neon-green); text-shadow: 0 0 20px var(--neon-green); }
+            100% { transform: scale(1); color: #fff; }
+        }
+        .anim-score { animation: scoreGlassPop 2s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+
+        ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #444; }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 10px; }
     </style>
 </head>
 <body>
 
-    <div class="scanline"></div>
+    <div class="ambient-orb orb-1"></div>
+    <div class="ambient-orb orb-2"></div>
+    <div class="ambient-orb orb-3"></div>
 
-    <div class="wrapper">
-        <div class="panel left-col">
-            <div class="sys-header">
-                <h1>Uplink Control</h1>
-                <div class="clock-display" id="sysClock">00:00:00.000</div>
+    <div class="glass-wrapper">
+        
+        <div class="glass-panel left-col">
+            <div class="header-container">
+                <h1 class="header-title">Broadcast Array</h1>
+                <div class="header-sub" id="sysClock">00:00:00</div>
             </div>
 
-            <div class="comm-module">
-                <input type="text" id="commandInput" class="comm-input" placeholder="Type Google Home broadcast..." autocomplete="off">
-                <button id="execBtn" class="btn-override" onclick="triggerBroadcast()">Execute Payload</button>
-                
-                <div class="buffer-track">
-                    <div id="bufferFill" class="buffer-fill"></div>
+            <div class="input-group">
+                <input type="text" id="chatInput" class="glass-input" placeholder="Type transmission payload..." autocomplete="off">
+                <button id="sendBtn" class="glass-btn" onclick="executeWebhook()">Broadcast to House</button>
+            </div>
+
+            <div class="buffer-track">
+                <div id="bufferFill" class="buffer-fill"></div>
+            </div>
+            
+            <div class="status-container">
+                <span id="connStatus" style="color: var(--neon-blue);">● SECURE UPLINK</span>
+                <span id="bufferStatus" style="color: var(--text-dim);">READY</span>
+            </div>
+
+            <div class="console-glass" id="glassConsole">
+                <div class="log-entry">
+                    <span class="log-time">[SYS_INIT]</span><span class="log-msg">Liquid Glass Core loaded.</span>
                 </div>
-                <div id="bufferText" style="text-align: right; font-size: 0.75rem; color: #666; font-weight: bold; margin-top: 4px;">SYSTEM READY</div>
-            </div>
-
-            <div class="console-output" id="terminal">
-                <div class="term-line term-info">>> KERNEL LOADED. INITIALIZING WEBSOCKETS.</div>
+                <div class="log-entry" id="webhookWarning" style="color: var(--neon-yellow); display: none; font-weight: bold;">
+                    ⚠️ WARNING: NO WEBHOOK URL DETECTED. SYSTEM UNARMED.
+                </div>
             </div>
         </div>
 
-        <div class="panel right-col">
-            <div class="telemetry-header">
-                <h2>STRICT-LIVE FEED</h2>
-                <div class="live-indicator"><div class="pulse-dot"></div> ACTIVE POLLING</div>
+        <div class="glass-panel right-col">
+            <div class="live-header">
+                <h2 class="live-title">Live Telemetry</h2>
+                <div class="live-badge"><div class="pulse-dot"></div> STRICTLY LIVE</div>
             </div>
-            <div class="sports-grid" id="sportsContainer">
+            <div class="sports-grid" id="sportsGrid">
                 </div>
         </div>
+
     </div>
 
     <script>
         /**
          * =======================================================================
-         * 1. GOOGLE HOME WEBHOOK CONFIGURATION
+         * 1. GOOGLE HOME & SCRYPTED WEBHOOK CONFIGURATION
          * =======================================================================
+         * 🔴🔴🔴 YOUR CODE WILL NOT WORK UNTIL YOU PASTE YOUR LINK BELOW 🔴🔴🔴
          */
-        // ⚠️ PASTE YOUR SCRYPTED CLOUDFLARE WEBHOOK URL HERE ⚠️
-        const WEBHOOK_TARGET = "YOUR_WEBHOOK_URL_HERE"; 
+        const SCRYPTED_WEBHOOK = "YOUR_LINK_GOES_HERE"; 
         
-        const COOLDOWN_TIME = 60000; 
-        let isLocked = false;
+        const COOLDOWN_MS = 60000; 
+        let isSystemLocked = false;
 
-        function termLog(msg, type="info") {
-            const term = document.getElementById('terminal');
-            const line = document.createElement('div');
-            line.className = `term-line term-${type}`;
-            const ts = new Date().toISOString().split('T')[1].slice(0, 12);
-            line.innerText = `[${ts}] ${msg}`;
-            term.appendChild(line);
-            term.scrollTop = term.scrollHeight;
+        function addLog(msg, type = "normal") {
+            const consoleEl = document.getElementById('glassConsole');
+            const entry = document.createElement('div');
+            entry.className = 'log-entry';
+            const time = new Date().toLocaleTimeString('en-US', { hour12: false });
+            entry.innerHTML = `<span class="log-time">[${time}]</span><span class="log-msg ${type}">${msg}</span>`;
+            consoleEl.prepend(entry);
         }
 
-        async function triggerBroadcast() {
-            if (isLocked) return;
-            const input = document.getElementById('commandInput');
-            const payload = input.value.trim();
+        // Startup Check
+        if (SCRYPTED_WEBHOOK === "YOUR_LINK_GOES_HERE" || SCRYPTED_WEBHOOK === "") {
+            document.getElementById('webhookWarning').style.display = 'block';
+        }
+
+        async function executeWebhook() {
+            if (isSystemLocked) return;
             
-            if (!payload) { termLog("ERR: Empty payload rejected.", "alert"); return; }
+            const inputEl = document.getElementById('chatInput');
+            const text = inputEl.value.trim();
             
-            termLog(`FIRING: "${payload}"`, "exec");
+            if (!text) { addLog("Payload is empty. Aborted.", "error"); return; }
+
+            // ⚠️ CRITICAL KNOWLEDGE BOMB:
+            // A simple Dummy Switch *cannot* pass your custom text string to Google Home via a standard Routine starter. 
+            // The switch turns ON, and Google reads the pre-programmed YAML message ("Attention! A new message...").
+            // We append the text to the URL here as a parameter (`&payload=...`) just in case your backend is ever upgraded to handle it!
             
+            const targetUrl = `${SCRYPTED_WEBHOOK}?state=on&payload=${encodeURIComponent(text)}`;
+            
+            addLog(`Initializing trigger sequence...`, "normal");
+
             try {
-                fetch(WEBHOOK_TARGET, { method: 'GET', mode: 'no-cors' });
-                termLog("WEBHOOK SIGNAL SENT.", "exec");
-            } catch (e) {
-                termLog("NET_ERR: Bridge unreachable.", "alert");
+                // We use mode: 'no-cors' so the browser doesn't throw a cross-origin security block
+                await fetch(targetUrl, { method: 'GET', mode: 'no-cors' });
+                addLog(`Switch flipped ON. Triggering Google Home.`, "success");
+            } catch (error) {
+                addLog(`Network Failure: Could not reach Scrypted server.`, "error");
             }
 
-            input.value = "";
-            initiateLockout();
+            inputEl.value = "";
+            engageCooldown();
         }
 
-        function initiateLockout() {
-            isLocked = true;
-            const btn = document.getElementById('execBtn');
+        function engageCooldown() {
+            isSystemLocked = true;
+            const btn = document.getElementById('sendBtn');
             const fill = document.getElementById('bufferFill');
-            const txt = document.getElementById('bufferText');
+            const statusText = document.getElementById('bufferStatus');
             
             btn.disabled = true;
-            btn.innerText = "BUFFERING...";
+            btn.innerText = "COOLING DOWN...";
             fill.style.transition = "none";
             fill.style.width = "100%";
             
-            let msLeft = COOLDOWN_TIME;
-            void fill.offsetWidth; 
-            fill.style.transition = `width ${COOLDOWN_TIME}ms linear`;
+            void fill.offsetWidth; // Reflow
+            fill.style.transition = `width ${COOLDOWN_MS}ms linear`;
             fill.style.width = "0%";
 
-            const lockTimer = setInterval(() => {
+            let msLeft = COOLDOWN_MS;
+            const timer = setInterval(() => {
                 msLeft -= 100;
-                txt.innerText = `COOLDOWN: ${(msLeft / 1000).toFixed(1)}s`;
+                statusText.innerText = `BUFFER: ${(msLeft / 1000).toFixed(1)}s`;
+                
                 if (msLeft <= 0) {
-                    clearInterval(lockTimer);
-                    isLocked = false;
+                    clearInterval(timer);
+                    isSystemLocked = false;
                     btn.disabled = false;
-                    btn.innerText = "EXECUTE PAYLOAD";
-                    txt.innerText = "SYSTEM READY";
-                    termLog("BUFFER CLEARED. WEAPONS HOT.", "info");
+                    btn.innerText = "BROADCAST TO HOUSE";
+                    statusText.innerText = "READY";
+                    addLog("Buffer cleared. System armed.", "success");
                 }
             }, 100);
         }
 
-        document.getElementById('commandInput').addEventListener('keypress', (e) => {
-            if(e.key === 'Enter') triggerBroadcast();
+        document.getElementById('chatInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') executeWebhook();
         });
-
 
         /**
          * =======================================================================
          * 2. STRICT-LIVE SPORTS ENGINE
          * =======================================================================
          */
-        const MEMORY_BANK = {}; 
-        const API_NODES = [
+        const SCORE_MEMORY = {};
+        const ENDPOINTS = [
             { id: "NBA", url: "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/scoreboard" },
             { id: "NCAA", url: "https://site.api.espn.com/apis/site/v2/sports/basketball/mens-college-basketball/scoreboard" },
             { id: "MLB", url: "https://site.api.espn.com/apis/site/v2/sports/baseball/mlb/scoreboard" },
             { id: "SOCCER", url: "https://site.api.espn.com/apis/site/v2/sports/soccer/eng.1/scoreboard" }
         ];
 
-        async function pollTelemetry() {
-            let activeNodes = [];
+        async function fetchLiveData() {
+            let parsedGames = [];
 
-            for (const node of API_NODES) {
+            for (const api of ENDPOINTS) {
                 try {
-                    const res = await fetch(node.url);
-                    const json = await res.json();
+                    const res = await fetch(api.url);
+                    const data = await res.json();
                     
-                    if (json.events) {
-                        json.events.forEach(game => {
-                            // STRICT LIVE CHECK: Only state 'in' means the clock is actively running right now.
-                            if (game.status.type.state === 'in') {
-                                activeNodes.push(extractGameData(game, node.id));
+                    if (data.events) {
+                        data.events.forEach(event => {
+                            // STRICT LIVE CHECK: 'in' state means actively playing
+                            if (event.status.type.state === 'in') {
+                                const c = event.competitions[0];
+                                parsedGames.push({
+                                    uid: `${api.id}_${event.id}`,
+                                    league: api.id,
+                                    clock: event.status.type.detail,
+                                    home: { name: c.competitors[0].team.shortDisplayName, score: parseInt(c.competitors[0].score) || 0 },
+                                    away: { name: c.competitors[1].team.shortDisplayName, score: parseInt(c.competitors[1].score) || 0 }
+                                });
                             }
                         });
                     }
-                } catch (err) {
-                    termLog(`POLL_FAIL: ${node.id} endpoint down.`, "alert");
+                } catch (e) {
+                    console.log("Endpoint skip:", api.id);
                 }
             }
-            renderDOM(activeNodes);
+            updateGrid(parsedGames);
         }
 
-        function extractGameData(raw, league) {
-            const c = raw.competitions[0];
-            const t1 = c.competitors[0];
-            const t2 = c.competitors[1];
-            
-            return {
-                uuid: `${league}_${raw.id}`,
-                league: league,
-                clock: raw.status.type.detail,
-                home: { id: t1.team.id, name: t1.team.shortDisplayName, score: parseInt(t1.score) || 0 },
-                away: { id: t2.team.id, name: t2.team.shortDisplayName, score: parseInt(t2.score) || 0 }
-            };
-        }
-
-        function renderDOM(liveGames) {
-            const container = document.getElementById('sportsContainer');
+        function updateGrid(liveGames) {
+            const grid = document.getElementById('sportsGrid');
             
             if (liveGames.length === 0) {
-                container.innerHTML = `<div class="no-games">[ SYSTEM IDLE: NO LIVE OPERATIONS DETECTED ]</div>`;
+                grid.innerHTML = `<div class="no-games">NO ACTIVE GAMES DETECTED</div>`;
                 return;
             }
 
-            // We update existing DOM elements to allow CSS animations to trigger properly
-            // instead of wiping the innerHTML entirely every 15 seconds.
-            
-            const currentDOMIds = Array.from(container.children).map(el => el.id);
-            const incomingIds = liveGames.map(g => g.uuid);
-
-            // 1. Remove games that are no longer live
-            currentDOMIds.forEach(id => {
-                if (!incomingIds.includes(id) && id !== '') {
-                    document.getElementById(id).remove();
-                }
+            const activeIds = liveGames.map(g => g.uid);
+            Array.from(grid.children).forEach(child => {
+                if (!activeIds.includes(child.id) && child.id !== '') child.remove();
             });
 
-            // 2. Add or Update games
             liveGames.forEach(game => {
-                let card = document.getElementById(game.uuid);
+                let card = document.getElementById(game.uid);
                 
-                // If game isn't on screen yet, build the HTML structure
                 if (!card) {
+                    // Create new glass card
                     card = document.createElement('div');
-                    card.className = 'game-node';
-                    card.id = game.uuid;
+                    card.className = 'glass-card';
+                    card.id = game.uid;
                     card.innerHTML = `
-                        <div class="league-tag">${game.league}</div>
-                        <div class="team-block">
+                        <div class="league-pill">${game.league}</div>
+                        <div class="team-row">
                             <span class="team-name">${game.away.name}</span>
-                            <span class="team-score" id="score_${game.uuid}_away">${game.away.score}</span>
+                            <span class="team-score" id="score_${game.uid}_away">${game.away.score}</span>
                         </div>
-                        <div class="team-block">
+                        <div class="team-row">
                             <span class="team-name">${game.home.name}</span>
-                            <span class="team-score" id="score_${game.uuid}_home">${game.home.score}</span>
+                            <span class="team-score" id="score_${game.uid}_home">${game.home.score}</span>
                         </div>
-                        <div class="clock-block" id="clock_${game.uuid}">${game.clock}</div>
+                        <div class="game-clock" id="clock_${game.uid}">${game.clock}</div>
                     `;
-                    container.appendChild(card);
+                    grid.appendChild(card);
                     
-                    // Init memory
-                    MEMORY_BANK[`${game.uuid}_away`] = game.away.score;
-                    MEMORY_BANK[`${game.uuid}_home`] = game.home.score;
+                    SCORE_MEMORY[`${game.uid}_away`] = game.away.score;
+                    SCORE_MEMORY[`${game.uid}_home`] = game.home.score;
                 } else {
-                    // Game exists, update clock
-                    document.getElementById(`clock_${game.uuid}`).innerText = game.clock;
+                    // Update existing
+                    document.getElementById(`clock_${game.uid}`).innerText = game.clock;
 
-                    // Check Away Score
-                    const awayMemKey = `${game.uuid}_away`;
-                    if (game.away.score > MEMORY_BANK[awayMemKey]) {
-                        termLog(`SCORE EVENT: ${game.away.name} [${game.away.score}]`, "term-alert");
-                        triggerScoreAnimation(card, `score_${game.uuid}_away`, game.away.score);
-                        MEMORY_BANK[awayMemKey] = game.away.score;
+                    if (game.away.score > SCORE_MEMORY[`${game.uid}_away`]) {
+                        fireAnimation(`score_${game.uid}_away`, game.away.score);
+                        SCORE_MEMORY[`${game.uid}_away`] = game.away.score;
                     }
-
-                    // Check Home Score
-                    const homeMemKey = `${game.uuid}_home`;
-                    if (game.home.score > MEMORY_BANK[homeMemKey]) {
-                        termLog(`SCORE EVENT: ${game.home.name} [${game.home.score}]`, "term-alert");
-                        triggerScoreAnimation(card, `score_${game.uuid}_home`, game.home.score);
-                        MEMORY_BANK[homeMemKey] = game.home.score;
+                    if (game.home.score > SCORE_MEMORY[`${game.uid}_home`]) {
+                        fireAnimation(`score_${game.uid}_home`, game.home.score);
+                        SCORE_MEMORY[`${game.uid}_home`] = game.home.score;
                     }
                 }
             });
         }
 
-        // --- THE TARGETED DOM ANIMATION ENGINE ---
-        function triggerScoreAnimation(cardElement, scoreElementId, newScore) {
-            const scoreEl = document.getElementById(scoreElementId);
-            
-            // Update the actual text
-            scoreEl.innerText = newScore;
-            
-            // Remove classes if they exist to reset animation state
-            scoreEl.classList.remove('score-updated');
-            cardElement.classList.remove('card-updated');
-            
-            // Force browser reflow (the secret to restarting CSS animations)
-            void scoreEl.offsetWidth; 
-            void cardElement.offsetWidth;
-            
-            // Apply animation classes
-            scoreEl.classList.add('score-updated');
-            cardElement.classList.add('card-updated');
-            
-            // Clean up classes after animation finishes (2.5s)
-            setTimeout(() => {
-                if (scoreEl) scoreEl.classList.remove('score-updated');
-                if (cardElement) cardElement.classList.remove('card-updated');
-            }, 2500);
+        function fireAnimation(elementId, newScore) {
+            const el = document.getElementById(elementId);
+            el.innerText = newScore;
+            el.classList.remove('anim-score');
+            void el.offsetWidth; // Force Reflow
+            el.classList.add('anim-score');
         }
 
-        // =======================================================================
-        // 3. SYSTEM LOOP INITIALIZATION
-        // =======================================================================
+        // Boot
         setInterval(() => {
             const d = new Date();
-            document.getElementById('sysClock').innerText = 
-                d.toLocaleTimeString('en-US', { hour12: false }) + "." + String(d.getMilliseconds()).padStart(3, '0');
-        }, 47); // Weird interval makes it look cooler/faster
+            document.getElementById('sysClock').innerText = d.toLocaleTimeString('en-US', { hour12: false }) + ":" + String(d.getMilliseconds()).padStart(3, '0');
+        }, 50);
 
-        setTimeout(() => { termLog("ESTABLISHING ESPN API LINK...", "info"); }, 800);
-        setTimeout(pollTelemetry, 1500);
-        
-        // Rapid 10-second polling for live score accuracy
-        setInterval(pollTelemetry, 10000);
+        setTimeout(fetchLiveData, 1000);
+        setInterval(fetchLiveData, 10000); // Poll every 10 seconds for maximum accuracy
 
     </script>
 </body>
