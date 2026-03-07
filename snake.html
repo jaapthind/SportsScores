@@ -3,170 +3,170 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>NEXUS APEX BROADCAST ENGINE</title>
+<title>Virtual Stadium Telemetry Engine</title>
 
 <style>
 
+/* ===============================
+LIQUID GLASS UI
+=============================== */
+
 :root{
---glass:rgba(5,8,15,0.88);
---border:rgba(255,255,255,0.2);
---cyan:#00f3ff;
---gold:#ffcf40;
---magenta:#ff007f;
---green:#00ff88;
---red:#ff3333;
---blur:blur(80px) saturate(250%);
---font-mono:'JetBrains Mono',monospace;
+--glass:rgba(6,12,18,.82);
+--cyan:#00eaff;
+--border:rgba(255,255,255,.15);
+--blur:blur(70px) saturate(180%);
+--mono:'JetBrains Mono',monospace;
 }
 
 *{
 margin:0;
 padding:0;
 box-sizing:border-box;
-font-family:'SF Pro Display',sans-serif;
+font-family:'SF Pro Display',system-ui;
 }
 
 body{
-background:#000;
-color:#fff;
+background:#03050a;
+color:white;
 overflow:hidden;
 height:100vh;
 }
 
-#arenaStage{
-position:fixed;
-top:0;
-left:0;
-width:100vw;
-height:100vh;
-display:none;
-z-index:10000;
-background:radial-gradient(circle,#00000088,#000);
-backdrop-filter:blur(40px);
-}
+/* ===============================
+HEADER
+=============================== */
 
-#arenaCanvas{
-width:100%;
-height:100%;
-}
-
-#particleCanvas{
+header{
 position:fixed;
 top:0;
 left:0;
 width:100%;
-height:100%;
-z-index:1;
-opacity:.6;
-pointer-events:none;
-}
-
-.nexus-header{
-position:fixed;
-top:0;
-left:0;
-width:100%;
-height:100px;
+height:90px;
 display:flex;
 align-items:center;
 justify-content:space-between;
 padding:0 60px;
-background:#0008;
+background:rgba(0,0,0,.55);
 backdrop-filter:blur(40px);
-border-bottom:2px solid var(--border);
-z-index:1000;
+border-bottom:1px solid var(--border);
+z-index:500;
 }
 
-.header-brand{
-font-size:2.2rem;
-font-weight:950;
-letter-spacing:-3px;
+.brand{
+font-size:1.9rem;
+font-weight:900;
+letter-spacing:-2px;
 }
 
-.sys-clock{
-font-family:var(--font-mono);
+.clock{
+font-family:var(--mono);
 color:var(--cyan);
 }
 
-.master-layout{
+/* ===============================
+DASHBOARD
+=============================== */
+
+.dashboard{
+position:absolute;
+top:110px;
+left:40px;
+right:40px;
+bottom:40px;
 display:grid;
-grid-template-columns:480px 1fr;
+grid-template-columns:440px 1fr;
 gap:40px;
-padding:140px 40px 40px 40px;
-height:100vh;
-z-index:10;
-position:relative;
 }
 
 .panel{
 background:var(--glass);
 border:1px solid var(--border);
-border-radius:56px;
+border-radius:40px;
 backdrop-filter:var(--blur);
-box-shadow:0 80px 160px rgba(0,0,0,1);
-display:flex;
-flex-direction:column;
-overflow:hidden;
-}
-
-.panel-head{
-padding:40px;
-border-bottom:2px solid var(--border);
-}
-
-.panel-body{
-padding:40px;
+padding:30px;
 overflow:auto;
-flex-grow:1;
-display:flex;
-flex-direction:column;
-gap:40px;
 }
 
 .matrix{
 display:grid;
-grid-template-columns:repeat(auto-fill,minmax(420px,1fr));
-gap:40px;
+grid-template-columns:repeat(auto-fill,minmax(340px,1fr));
+gap:25px;
 }
 
 .card{
-background:#ffffff08;
-border:2px solid var(--border);
-border-radius:48px;
-padding:40px;
-transition:.4s;
+background:rgba(255,255,255,.05);
+border:1px solid var(--border);
+border-radius:25px;
+padding:20px;
+transition:.3s;
 }
 
 .card:hover{
 border-color:var(--cyan);
-transform:translateY(-10px);
+box-shadow:0 0 25px rgba(0,234,255,.4);
 }
 
-.score-row{
-display:flex;
-justify-content:space-between;
-align-items:center;
-margin-bottom:20px;
-}
-
-.val-large{
-font-size:3.6rem;
+.score{
+font-size:2.8rem;
 font-weight:900;
-font-family:var(--font-mono);
-}
-
-.clock{
-font-family:var(--font-mono);
-color:var(--cyan);
+font-family:var(--mono);
 }
 
 .play{
 font-size:.85rem;
-color:#888;
-max-width:60%;
-overflow:hidden;
-text-overflow:ellipsis;
-white-space:nowrap;
+opacity:.7;
+margin-top:10px;
+}
+
+/* ===============================
+GOOGLE HOME RELAY BOX
+=============================== */
+
+.relay-box{
+margin-top:20px;
+display:flex;
+flex-direction:column;
+gap:10px;
+}
+
+.relay-box input{
+padding:15px;
+border-radius:12px;
+border:none;
+background:#0d1118;
+color:white;
+font-family:var(--mono);
+}
+
+.relay-box button{
+padding:15px;
+border-radius:12px;
+border:none;
+background:var(--cyan);
+font-weight:700;
+cursor:pointer;
+}
+
+/* ===============================
+SHOT THEATER (ISOLATED GPU LAYER)
+=============================== */
+
+#shotLayer{
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+z-index:10000;
+display:none;
+will-change:transform;
+transform:translateZ(0);
+}
+
+canvas{
+width:100%;
+height:100%;
 }
 
 </style>
@@ -174,135 +174,137 @@ white-space:nowrap;
 
 <body>
 
-<div id="arenaStage">
-<canvas id="arenaCanvas"></canvas>
-</div>
-
-<header class="nexus-header">
-<div class="header-brand">NEXUS APEX</div>
-<div id="sysClock" class="sys-clock"></div>
+<header>
+<div class="brand">Virtual Stadium Engine</div>
+<div id="clock" class="clock"></div>
 </header>
 
-<div class="master-layout">
+<div class="dashboard">
 
 <div class="panel">
 
-<div class="panel-head">
-Command Terminal
-</div>
+<h3>Google Home Relay</h3>
 
-<div class="panel-body">
-<div id="termLog"></div>
+<div class="relay-box">
+<input id="relayText" placeholder="Broadcast message">
+<button onclick="relay()">Trigger Broadcast</button>
 </div>
 
 </div>
 
 <div class="panel">
-
-<div class="panel-head">
-Arena Telemetry
-</div>
-
-<div class="panel-body">
-
-<div id="matrix" class="matrix"></div>
-
+<div id="games" class="matrix"></div>
 </div>
 
 </div>
 
+<div id="shotLayer">
+<canvas id="arena"></canvas>
 </div>
 
 <script>
 
-/* ===============================
-DATA SOURCES
-=============================== */
+/* =============================
+ESPN TELEMETRY
+============================= */
 
 const SOURCES=[
-
-{ id:"NBA",
-url:"https://site.api.espn.com/apis/site/v2/sports/basketball/nba/scoreboard"},
-
-{ id:"NCAA",
-url:"https://site.api.espn.com/apis/site/v2/sports/basketball/mens-college-basketball/scoreboard"}
-
+{url:"https://site.api.espn.com/apis/site/v2/sports/basketball/nba/scoreboard"},
+{url:"https://site.api.espn.com/apis/site/v2/sports/basketball/mens-college-basketball/scoreboard"}
 ]
 
-let scoreVault={}
+let scoreCache={}
 
-/* ===============================
-SHOT PARSING ENGINE
-=============================== */
+/* =============================
+CLOCK INTERPOLATION
+============================= */
 
-function parseShotDistance(play){
+setInterval(()=>{
 
-let match=play.match(/(\d+)[-\s]?foot/i)
+let d=new Date()
 
-if(match) return parseInt(match[1])
+document.getElementById("clock").innerText=
+d.toLocaleTimeString("en-US",{hour12:false})+"."+String(d.getMilliseconds()).padStart(3,"0")
 
-if(play.includes("three")) return 24
+},1)
 
-return 10
+/* =============================
+GOOGLE HOME RELAY
+============================= */
+
+const RELAY_URL="https://pets-hdtv-enormous-objects.trycloudflare.com/endpoint/@scrypted/webhook/public/33/fe2475e0d68cf025/turnOn"
+
+function relay(){
+
+fetch(RELAY_URL,{method:"GET",mode:"no-cors"})
+setTimeout(()=>fetch(RELAY_URL,{method:"GET",mode:"no-cors"}),400)
 
 }
 
-function detectShotType(play){
+/* =============================
+SHOT PARSER
+============================= */
 
-play=play.toLowerCase()
+function parseDistance(text){
 
-if(play.includes("dunk")||play.includes("slam"))
-return "dunk"
+let m=text.match(/(\d+)[- ]?ft/i)
 
-if(play.includes("layup"))
-return "layup"
+if(m) return parseInt(m[1])
 
-if(play.includes("three"))
-return "three"
+if(text.includes("three")) return 24
+
+return 12
+
+}
+
+function detectType(text){
+
+text=text.toLowerCase()
+
+if(text.includes("dunk")) return "dunk"
+if(text.includes("layup")) return "layup"
+if(text.includes("three")) return "three"
 
 return "jumper"
 
 }
 
-/* ===============================
-DATA POLLING
-=============================== */
+/* =============================
+FETCH TELEMETRY
+============================= */
 
-async function pollTelemetry(){
+async function poll(){
 
-let events=[]
+let games=[]
 
-for(let src of SOURCES){
+for(let s of SOURCES){
 
 try{
 
-let r=await fetch(src.url)
+let r=await fetch(s.url)
 let j=await r.json()
 
-j.events.forEach(g=>{
+j.events.forEach(e=>{
 
-if(g.status.type.state==="in"){
+if(e.status.type.state==="in"){
 
-let c=g.competitions[0]
+let c=e.competitions[0]
 
-events.push({
+games.push({
 
-id:g.id,
-league:src.id,
-clock:g.status.displayClock,
+id:e.id,
+clock:e.status.displayClock,
 play:c.situation?.lastPlay?.text||"",
-athleteId:c.situation?.lastPlay?.athletes?.[0]?.id||null,
-
-h:{
-name:c.competitors[0].team.shortDisplayName,
-score:+c.competitors[0].score,
-logo:c.competitors[0].team.logo
-},
+athlete:c.situation?.lastPlay?.athletes?.[0]?.id||null,
 
 a:{
+name:c.competitors[0].team.shortDisplayName,
+score:+c.competitors[0].score
+},
+
+h:{
 name:c.competitors[1].team.shortDisplayName,
-score:+c.competitors[1].score,
-logo:c.competitors[1].team.logo
+score:+c.competitors[1].score
 }
 
 })
@@ -315,39 +317,32 @@ logo:c.competitors[1].team.logo
 
 }
 
-renderMatrix(events)
+render(games)
 
 }
 
-setInterval(pollTelemetry,15000)
-pollTelemetry()
+setInterval(poll,15000)
+poll()
 
-/* ===============================
-UI RENDER
-=============================== */
+/* =============================
+RENDER DASHBOARD
+============================= */
 
-function renderMatrix(games){
+function render(games){
 
-const m=document.getElementById("matrix")
+let container=document.getElementById("games")
 
-m.innerHTML=games.map(g=>`
+container.innerHTML=games.map(g=>`
 
 <div class="card">
 
-<div class="score-row">
-${g.a.name}
-<div class="val-large">${g.a.score}</div>
-</div>
+<div>${g.a.name}</div>
+<div class="score">${g.a.score}</div>
 
-<div class="score-row">
-${g.h.name}
-<div class="val-large">${g.h.score}</div>
-</div>
+<div>${g.h.name}</div>
+<div class="score">${g.h.score}</div>
 
-<div class="score-row">
-<div class="clock">${g.clock}</div>
 <div class="play">${g.play}</div>
-</div>
 
 </div>
 
@@ -355,179 +350,128 @@ ${g.h.name}
 
 games.forEach(g=>{
 
-if(scoreVault[g.id+"a"]!=null && g.a.score>scoreVault[g.id+"a"])
-startArenaAnimation(g)
+if(scoreCache[g.id] && g.h.score>scoreCache[g.id].h){
 
-if(scoreVault[g.id+"h"]!=null && g.h.score>scoreVault[g.id+"h"])
-startArenaAnimation(g)
+launchShot(g)
 
-scoreVault[g.id+"a"]=g.a.score
-scoreVault[g.id+"h"]=g.h.score
+}
+
+scoreCache[g.id]=g
 
 })
 
 }
 
-/* ===============================
-ASSETS
-=============================== */
+/* =============================
+ARENA ENGINE
+============================= */
 
-const arenaCanvas=document.getElementById("arenaCanvas")
-const ctx=arenaCanvas.getContext("2d")
+const canvas=document.getElementById("arena")
+const ctx=canvas.getContext("2d")
 
-const assets={
-court:new Image(),
-rim:new Image(),
-ball:new Image()
-}
+canvas.width=innerWidth
+canvas.height=innerHeight
 
-assets.court.src="https://i.imgur.com/8Q2Wq4U.jpeg"
-assets.rim.src="https://i.imgur.com/vUoO8gV.png"
-assets.ball.src="https://i.imgur.com/vHqC6M7.png"
+let ballImg=new Image()
+ballImg.src="https://upload.wikimedia.org/wikipedia/commons/7/7a/Basketball.png"
 
-async function loadPlayer(id){
+function drawHoop(x,y){
 
-return new Promise(res=>{
-
-let img=new Image()
-
-img.src=id?
-`https://a.espncdn.com/i/headshots/nba/players/full/${id}.png`
-:
-"https://a.espncdn.com/i/teamlogos/default-team-logo-500.png"
-
-img.onload=()=>res(img)
-
-})
-
-}
-
-/* ===============================
-ARENA FX ENGINE
-=============================== */
-
-let particles=[]
-
-function spawnExplosion(x,y){
-
-for(let i=0;i<120;i++){
-
-particles.push({
-
-x:x,
-y:y,
-vx:(Math.random()-.5)*14,
-vy:(Math.random()-.5)*14,
-life:100
-
-})
-
-}
-
-}
-
-function updateParticles(){
-
-particles.forEach(p=>{
-
-p.x+=p.vx
-p.y+=p.vy
-p.life--
+ctx.strokeStyle="#aaa"
+ctx.lineWidth=6
 
 ctx.beginPath()
-ctx.arc(p.x,p.y,3,0,Math.PI*2)
-ctx.fillStyle="#ffcf40"
-ctx.fill()
+ctx.arc(x,y,40,0,Math.PI*2)
+ctx.stroke()
 
-})
-
-particles=particles.filter(p=>p.life>0)
+drawNet(x,y)
 
 }
 
-/* ===============================
-MAIN ARENA ANIMATION
-=============================== */
+function drawNet(x,y){
 
-async function startArenaAnimation(game){
+for(let i=0;i<10;i++){
 
-const stage=document.getElementById("arenaStage")
-stage.style.display="block"
+let offset=Math.sin(netPhase+i*.5)*6
 
-arenaCanvas.width=innerWidth
-arenaCanvas.height=innerHeight
+ctx.beginPath()
+ctx.moveTo(x-30+i*6,y)
+ctx.lineTo(x-20+i*4,y+40+offset)
+ctx.strokeStyle="#ddd"
+ctx.stroke()
 
-const player=await loadPlayer(game.athleteId)
+}
 
-let play=game.play
-let shotType=detectShotType(play)
-let dist=parseShotDistance(play)
+}
 
-let hoopX=arenaCanvas.width*.85
-let hoopY=arenaCanvas.height*.35
+/* =============================
+SHOT SIMULATION
+============================= */
 
-let playerX=arenaCanvas.width*.2
-let playerY=arenaCanvas.height*.75
+let netPhase=0
+
+async function launchShot(game){
+
+document.getElementById("shotLayer").style.display="block"
+
+let player=new Image()
+
+player.src=
+`https://a.espncdn.com/i/headshots/nba/players/full/${game.athlete}.png`
+
+let dist=parseDistance(game.play)
+let type=detectType(game.play)
+
+let g=9.8
+
+let startX=200
+let startY=canvas.height-200
+
+let hoopX=canvas.width*.8
+let hoopY=canvas.height*.3
+
+let vx=(hoopX-startX)/90
+let vy=-20-(dist/3)
+
+let ball={x:startX,y:startY}
 
 let frame=0
 
-let ball={
-x:playerX+120,
-y:playerY-100,
-vx:(hoopX-playerX)/(90+dist),
-vy:-20-(dist/5),
-rot:0
-}
-
 function animate(){
 
-ctx.clearRect(0,0,arenaCanvas.width,arenaCanvas.height)
+ctx.clearRect(0,0,canvas.width,canvas.height)
 
-ctx.drawImage(assets.court,
-0,
-arenaCanvas.height*.75,
-arenaCanvas.width,
-arenaCanvas.height*.25)
+ctx.drawImage(player,startX-120,startY-200,220,220)
 
-ctx.drawImage(assets.rim,hoopX-160,hoopY-80,200,320)
+if(type==="layup"){
 
-ctx.drawImage(player,playerX,playerY-260,280,280)
-
-if(frame>30){
-
-ball.x+=ball.vx
-ball.y+=ball.vy
-ball.vy+=0.8
-ball.rot+=0.2
-
-ctx.save()
-
-ctx.translate(ball.x,ball.y)
-ctx.rotate(ball.rot)
-
-ctx.drawImage(assets.ball,-30,-30,60,60)
-
-ctx.restore()
+startX+=1.5
 
 }
 
-if(frame===80){
+ball.x+=vx
+ball.y+=vy
+vy+=g*.1
 
-spawnExplosion(hoopX,hoopY)
+ctx.drawImage(ballImg,ball.x,ball.y,40,40)
+
+drawHoop(hoopX,hoopY)
+
+if(Math.abs(ball.x-hoopX)<15){
+
+netPhase+=.4
 
 }
-
-updateParticles()
 
 frame++
 
-if(frame<200){
+if(frame<180){
 
 requestAnimationFrame(animate)
 
 }else{
 
-stage.style.display="none"
+document.getElementById("shotLayer").style.display="none"
 
 }
 
@@ -536,19 +480,6 @@ stage.style.display="none"
 animate()
 
 }
-
-/* ===============================
-SYSTEM CLOCK
-=============================== */
-
-setInterval(()=>{
-
-let d=new Date()
-
-document.getElementById("sysClock").innerText=
-d.toLocaleTimeString('en-US',{hour12:false})
-
-},40)
 
 </script>
 
