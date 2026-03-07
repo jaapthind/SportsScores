@@ -2,97 +2,139 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-    <title>ULTRADASH // APEX MONOLITH</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ULTRADASH // OMEGA MONOLITH</title>
     <style>
         :root {
-            --glass: rgba(15, 20, 30, 0.45);
-            --border: rgba(255, 255, 255, 0.12);
+            --glass-bg: rgba(12, 18, 28, 0.45);
+            --glass-border: rgba(255, 255, 255, 0.15);
+            --glass-shine: rgba(255, 255, 255, 0.1);
             --cyan: #00f3ff;
             --purple: #9d00ff;
             --green: #00ff88;
             --amber: #ffb700;
             --red: #ff3333;
-            --text-main: #ffffff;
-            --text-dim: #94a3b8;
-            --blur: blur(40px) saturate(180%);
+            --text: #f8fafc;
+            --blur: blur(45px) saturate(200%);
+            --shadow: 0 50px 100px rgba(0,0,0,0.8);
+            --transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; user-select: none; }
-        body { background: #020305; color: white; overflow: hidden; height: 100vh; position: relative; }
+        body { background: #010203; color: var(--text); overflow: hidden; height: 100vh; position: relative; }
 
-        /* --- AMBIENT PHYSICS --- */
-        #particleCanvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; pointer-events: none; opacity: 0.5; }
-        .orb { position: absolute; border-radius: 50%; filter: blur(120px); opacity: 0.3; z-index: 0; animation: float 25s infinite alternate ease-in-out; }
-        .orb-1 { width: 700px; height: 700px; background: #001f4d; top: -10%; left: -10%; }
-        .orb-2 { width: 600px; height: 600px; background: #3d004d; bottom: -10%; right: -10%; animation-delay: -5s; }
-        @keyframes float { 0% { transform: translate(0,0) scale(1); } 100% { transform: translate(100px, 80px) scale(1.1); } }
+        /* =======================================================================
+           1. AMBIENT ENGINE (PARTICLES & LIQUID)
+           ======================================================================= */
+        #particleCanvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; pointer-events: none; opacity: 0.6; }
+        .orb { position: absolute; border-radius: 50%; filter: blur(140px); opacity: 0.35; z-index: 0; animation: fluid 25s infinite alternate ease-in-out; }
+        .orb-1 { width: 800px; height: 800px; background: #001f4d; top: -15%; left: -10%; }
+        .orb-2 { width: 600px; height: 600px; background: #3d004d; bottom: -20%; right: -10%; animation-delay: -5s; }
+        @keyframes fluid { 0% { transform: translate(0,0) scale(1); } 100% { transform: translate(150px, 100px) scale(1.15); } }
 
-        /* --- GRID STRUCTURE --- */
-        .dash-layout { display: grid; grid-template-columns: 420px 1fr; gap: 25px; padding: 25px; height: 100vh; position: relative; z-index: 10; }
+        /* =======================================================================
+           2. SPRITE ENGINE (SCORING ANIMATIONS)
+           ======================================================================= */
+        #spriteLayer { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 10000; pointer-events: none; overflow: hidden; }
         
+        .score-sprite {
+            position: absolute; font-size: 5rem; 
+            filter: drop-shadow(0 0 20px rgba(255,255,255,0.5));
+            animation: streak 2.5s cubic-bezier(0.1, 0.7, 1.0, 0.1) forwards;
+        }
+        @keyframes streak {
+            0% { left: -150px; top: 40%; transform: rotate(0deg) scale(0.5); opacity: 0; }
+            20% { opacity: 1; }
+            80% { opacity: 1; }
+            100% { left: 110vw; top: 30%; transform: rotate(1080deg) scale(2); opacity: 0; }
+        }
+
+        /* =======================================================================
+           3. MASTER GRID & PANELS
+           ======================================================================= */
+        .master-layout {
+            display: grid; grid-template-columns: 420px 1fr; gap: 25px;
+            padding: 25px; height: 100vh; position: relative; z-index: 10;
+        }
+
         .liquid-panel {
-            background: var(--glass); backdrop-filter: var(--blur); -webkit-backdrop-filter: var(--blur);
-            border: 1px solid var(--border); border-top: 1px solid rgba(255,255,255,0.2);
-            border-radius: 36px; box-shadow: 0 50px 100px rgba(0,0,0,0.7);
-            display: flex; flex-direction: column; overflow: hidden;
+            background: var(--glass-bg); backdrop-filter: var(--blur); -webkit-backdrop-filter: var(--blur);
+            border: 1px solid var(--glass-border); border-top: 1px solid var(--glass-shine);
+            border-radius: 40px; box-shadow: var(--shadow);
+            display: flex; flex-direction: column; overflow: hidden; transition: var(--transition);
         }
+        .liquid-panel:hover { border-color: rgba(255,255,255,0.3); }
 
-        .panel-header { padding: 35px; border-bottom: 1px solid var(--border); background: rgba(0,0,0,0.3); }
-        .title { font-size: 1.8rem; font-weight: 900; letter-spacing: -1px; background: linear-gradient(90deg, #fff, var(--cyan)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .header { padding: 35px; border-bottom: 1px solid var(--glass-border); background: rgba(0,0,0,0.3); }
+        .title { font-size: 2rem; font-weight: 900; letter-spacing: -1.5px; background: linear-gradient(90deg, #fff, var(--cyan)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
 
-        .body { padding: 30px; overflow-y: auto; flex-grow: 1; display: flex; flex-direction: column; gap: 25px; }
+        .body { padding: 30px; overflow-y: auto; flex-grow: 1; display: flex; flex-direction: column; gap: 30px; }
 
-        /* --- COMMAND CENTER --- */
+        /* =======================================================================
+           4. GOOGLE HOME CONTROL HUB
+           ======================================================================= */
         .glass-input {
-            width: 100%; background: rgba(0,0,0,0.4); border: 1px solid var(--border);
-            color: #fff; padding: 22px; border-radius: 20px; outline: none; transition: 0.3s;
-            font-size: 1.1rem; box-shadow: inset 0 2px 10px rgba(0,0,0,0.5);
+            width: 100%; background: rgba(0,0,0,0.5); border: 1px solid var(--glass-border);
+            color: #fff; padding: 25px; border-radius: 20px; outline: none; transition: 0.3s;
+            font-size: 1.2rem; box-shadow: inset 0 2px 10px rgba(0,0,0,0.5);
         }
-        .glass-input:focus { border-color: var(--cyan); box-shadow: 0 0 25px rgba(0,243,255,0.15); }
+        .glass-input:focus { border-color: var(--cyan); box-shadow: 0 0 30px rgba(0,243,255,0.15); }
 
         .btn-apex {
             background: linear-gradient(135deg, rgba(255,255,255,0.1), transparent);
-            border: 1px solid var(--border); color: #fff; padding: 22px;
+            border: 1px solid var(--glass-border); color: #fff; padding: 22px;
             border-radius: 20px; font-weight: 900; cursor: pointer; text-transform: uppercase;
-            letter-spacing: 2px; transition: 0.3s;
+            letter-spacing: 2px; transition: 0.4s;
         }
-        .btn-apex:hover { background: var(--cyan); color: #000; box-shadow: 0 0 40px var(--cyan); transform: translateY(-3px); }
+        .btn-apex:hover:not(:disabled) { background: var(--cyan); color: #000; box-shadow: 0 0 50px var(--cyan); transform: translateY(-5px); }
+        .btn-apex:disabled { opacity: 0.3; cursor: not-allowed; border-color: var(--red); }
 
-        /* --- THE 10 BUTTON SOUNDBOARD --- */
-        .soundboard { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 10px; }
-        .sb-node {
-            background: rgba(0,0,0,0.3); border: 1px solid var(--border); color: var(--text-dim);
-            padding: 18px 10px; border-radius: 16px; font-size: 0.75rem; font-weight: 800; cursor: pointer;
-            transition: 0.3s; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 5px;
+        /* The Soundboard */
+        .sound-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .sb-btn {
+            background: rgba(0,0,0,0.3); border: 1px solid var(--glass-border); color: var(--text);
+            padding: 20px 10px; border-radius: 18px; font-size: 0.8rem; font-weight: 800; cursor: pointer;
+            transition: 0.3s; display: flex; flex-direction: column; align-items: center; gap: 8px;
         }
-        .sb-node span { font-size: 1.4rem; }
-        .sb-node:hover { background: rgba(0,243,255,0.1); color: var(--cyan); border-color: var(--cyan); }
+        .sb-btn span { font-size: 1.5rem; }
+        .sb-btn:hover { background: rgba(0,243,255,0.1); color: var(--cyan); border-color: var(--cyan); }
 
-        /* --- SPORTS MATRIX --- */
-        .matrix-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 25px; }
+        /* =======================================================================
+           5. SPORTS TELEMETRY GRID
+           ======================================================================= */
+        .matrix-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 25px; }
+        
         .game-card { 
-            background: rgba(255,255,255,0.02); border: 1px solid var(--border); border-radius: 28px; 
-            padding: 28px; transition: 0.4s; cursor: pointer; position: relative;
+            background: rgba(255, 255, 255, 0.02); border: 1px solid var(--glass-border); border-radius: 30px; 
+            padding: 30px; transition: 0.4s; cursor: pointer; position: relative;
         }
-        .game-card:hover { transform: translateY(-8px); border-color: var(--cyan); background: rgba(255,255,255,0.05); }
+        .game-card:hover { transform: translateY(-10px); border-color: var(--cyan); background: rgba(255,255,255,0.05); }
         
-        .league-badge { position: absolute; top: -12px; left: 25px; background: #fff; color: #000; padding: 5px 14px; border-radius: 10px; font-size: 0.75rem; font-weight: 900; }
+        .league-id { position: absolute; top: -14px; left: 30px; background: #fff; color: #000; padding: 6px 16px; border-radius: 12px; font-size: 0.8rem; font-weight: 900; }
         
-        .team-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-        .team-info { display: flex; align-items: center; gap: 15px; }
-        .logo-frame { width: 50px; height: 50px; background: #fff; border-radius: 50%; padding: 6px; box-shadow: 0 10px 20px rgba(0,0,0,0.3); }
-        .score-val { font-size: 2.5rem; font-weight: 900; transition: 0.3s; }
-        
-        .card-footer { display: flex; justify-content: space-between; margin-top: 20px; padding-top: 15px; border-top: 1px dashed var(--border); font-size: 0.85rem; color: var(--cyan); font-weight: 800; }
+        .team-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .team-meta { display: flex; align-items: center; gap: 20px; }
+        .logo-box { width: 55px; height: 55px; background: #fff; border-radius: 50%; padding: 7px; box-shadow: 0 10px 20px rgba(0,0,0,0.4); }
+        .logo-img { width: 100%; height: 100%; object-fit: contain; }
+        .score-val { font-size: 3rem; font-weight: 900; font-family: 'JetBrains Mono', monospace; }
 
-        /* --- TERMINAL --- */
-        #termLog { background: rgba(0,0,0,0.5); border-radius: 20px; padding: 25px; font-family: monospace; font-size: 0.8rem; height: 180px; overflow-y: auto; border: 1px solid var(--border); color: #888; }
+        .game-status { display: flex; justify-content: space-between; margin-top: 25px; padding-top: 20px; border-top: 1px dashed var(--glass-border); font-size: 0.9rem; color: var(--cyan); font-weight: 800; }
+
+        /* Hardware Monitor */
+        .hardware-module { background: rgba(0,0,0,0.3); border-radius: 20px; padding: 25px; border: 1px solid var(--glass-border); }
+        .hw-stat { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 0.85rem; font-weight: 800; }
+        .hw-bar { width: 100%; height: 6px; background: rgba(255,255,255,0.1); border-radius: 10px; overflow: hidden; margin-top: 5px; }
+        .hw-fill { height: 100%; background: var(--cyan); width: 45%; transition: 0.5s; }
+
+        /* =======================================================================
+           6. ANIMATIONS & TERMINAL
+           ======================================================================= */
+        #termLog { background: rgba(0,0,0,0.5); border-radius: 20px; padding: 25px; font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; height: 200px; overflow-y: auto; border: 1px solid var(--glass-border); color: #888; }
         .t-cyan { color: var(--cyan); }
-        
-        /* --- SCORING ANIMATION --- */
-        @keyframes flare { 0% { color: #fff; } 50% { color: var(--green); transform: scale(1.3); } 100% { color: #fff; } }
-        .score-pop { animation: flare 1.5s ease-out; }
+        .t-green { color: var(--green); }
+
+        @keyframes scoreFlash { 0% { color: #fff; } 50% { color: var(--green); transform: scale(1.5); text-shadow: 0 0 30px var(--green); } 100% { color: #fff; } }
+        .score-pop { animation: scoreFlash 1.5s ease-out; }
 
         ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
@@ -100,88 +142,139 @@
 </head>
 <body>
 
-    <div class="orb orb-1"></div>
-    <div class="orb orb-2"></div>
+    <div class="ambient-engine">
+        <div class="liquid-orb orb-1"></div>
+        <div class="liquid-orb orb-2"></div>
+    </div>
+    <div id="spriteLayer"></div>
     <canvas id="particleCanvas"></canvas>
 
-    <div class="dash-layout">
+    <div class="master-layout">
+        
         <div class="liquid-panel">
-            <div class="panel-header">
+            <div class="header">
                 <div class="title">Nexus Terminal</div>
                 <div id="clock" style="color: var(--cyan); font-weight: 900; margin-top: 5px;">00:00:00.000</div>
             </div>
             <div class="body">
-                <input type="text" id="cmdInput" class="glass-input" placeholder="Broadcasting transmission...">
-                <button class="btn-apex" onclick="runRelay()">Execute Uplink</button>
                 
-                <div style="margin-top: 10px;">
-                    <label style="font-size: 0.7rem; color: #666; font-weight: 900; letter-spacing: 2px;">OMNI-SOUNDBOARD</label>
-                    <div class="soundboard">
-                        <button class="sb-node" onclick="macro('Attention, it is now bedtime.')"><span>🌙</span> Bedtime</button>
-                        <button class="sb-node" onclick="macro('Dinner is served. Come to the table.')"><span>🍕</span> Dinner</button>
-                        <button class="sb-node" onclick="macro('Focus mode. Starting study session.')"><span>📚</span> Study</button>
-                        <button class="sb-node" onclick="macro('Wake up, time for Berkeley class!')"><span>☀️</span> Wake Up</button>
-                        <button class="sb-node" onclick="macro('Movie night starting. Lights down.')"><span>🎬</span> Movie</button>
-                        <button class="sb-node" onclick="macro('Grandpa, do you need anything?')"><span>👴</span> Grandpa</button>
-                        <button class="sb-node" onclick="macro('Security Alert: Someone is at the door.')"><span>🚨</span> Door Alert</button>
-                        <button class="sb-node" onclick="macro('Big game is on! Go Seahawks!')"><span>🏈</span> Game Time</button>
-                        <button class="sb-node" onclick="macro('Nexus system is rebooting now.')"><span>🔄</span> Reboot</button>
-                        <button class="sb-node" onclick="macro('Chill mode activated.')"><span>🎵</span> Chill</button>
+                <div style="display: flex; flex-direction: column; gap: 15px;">
+                    <input type="text" id="cmdInput" class="glass-input" placeholder="Initiate broadcast protocol...">
+                    <button class="btn-apex" id="execBtn" onclick="runRelay()">Execute Uplink</button>
+                    <div style="display: flex; justify-content: space-between; font-size: 0.7rem; color: #555; font-weight: 900;">
+                        <span id="bufStatus">BUFFER: READY</span>
+                        <span>COOLDOWN: 30S</span>
                     </div>
+                    <div class="hw-bar"><div id="bufFill" style="height:100%; width:0%; background:var(--cyan); transition: width 1s linear;"></div></div>
+                </div>
+
+                <div class="sound-grid">
+                    <button class="sb-btn" onclick="macro('Attention, it is now bedtime. Lights out.')"><span>🌙</span> Bedtime</button>
+                    <button class="sb-btn" onclick="macro('Dinner is served downstairs. Please come to the table.')"><span>🍕</span> Dinner</button>
+                    <button class="sb-btn" onclick="macro('Study session is starting. Focus mode enabled.')"><span>📚</span> Study</button>
+                    <button class="sb-btn" onclick="macro('Wake up call! Time for Berkeley City College.')"><span>☀️</span> Wake Up</button>
+                    <button class="sb-btn" onclick="macro('Movie night in progress. Please do not disturb.')"><span>🎬</span> Movie</button>
+                    <button class="sb-btn" onclick="macro('Grandpa Kulbir, do you need anything?')"><span>👴</span> Grandpa</button>
+                    <button class="sb-btn" onclick="macro('Security Alert: Movement detected near front door.')"><span>🚨</span> Alert</button>
+                    <button class="sb-btn" onclick="macro('Nexus System is checking diagnostics.')"><span>⚙️</span> Sys Check</button>
+                </div>
+
+                <div class="hardware-module">
+                    <div class="hw-stat"><span>RPI 5 CPU LOAD</span> <span id="cpuVal">42%</span></div>
+                    <div class="hw-bar"><div class="hw-fill" id="cpuBar"></div></div>
+                    <div class="hw-stat" style="margin-top:15px;"><span>CORE TEMP</span> <span id="tempVal" style="color:var(--amber);">48.2°C</span></div>
                 </div>
 
                 <div id="termLog">
-                    <div>> APEX KERNEL LOADED.</div>
-                    <div>> GOOGLE ROUTINE DETECTED.</div>
+                    <div>> OMEGA CORE v23.0 LOADED.</div>
+                    <div class="t-cyan">> UPLINK SECURE. ROUTINE ACTIVE.</div>
                 </div>
+
             </div>
         </div>
 
         <div class="liquid-panel">
-            <div class="panel-header" style="display: flex; justify-content: space-between; align-items: center;">
-                <div class="title">Strict Telemetry</div>
-                <div style="font-size: 0.8rem; color: var(--green); font-weight: 900;">● OMNI-STREAM ACTIVE</div>
+            <div class="header" style="display: flex; justify-content: space-between; align-items: center;">
+                <div class="title">Omni-Stream Telemetry</div>
+                <div style="font-size: 0.8rem; color: var(--green); font-weight: 900;">● LIVE TRANSMISSION ACTIVE</div>
             </div>
             <div class="body">
                 <div class="matrix-grid" id="matrix">
                     </div>
             </div>
         </div>
+
     </div>
 
     <script>
-        // 🔴 PASTE LINK HERE 🔴
+        // 🔴 PASTE WEBHOOK URL HERE 🔴
         const TARGET = "https://pets-hdtv-enormous-objects.trycloudflare.com/endpoint/@scrypted/webhook/public/33/fe2475e0d68cf025/turnOn";
-        let scores = {};
+        
+        const COOLDOWN_MS = 30000; 
+        let isLocked = false;
+        let scoreMem = {};
 
-        function log(m, c="") {
+        function addLog(msg, col="") {
             const l = document.getElementById('termLog');
-            l.innerHTML += `<div class="${c}">> ${new Date().toLocaleTimeString()}: ${m}</div>`;
+            l.innerHTML += `<div class="${col}">[${new Date().toLocaleTimeString()}] > ${msg}</div>`;
             l.scrollTop = l.scrollHeight;
         }
 
         async function runRelay() {
-            const val = document.getElementById('cmdInput').value;
+            if(isLocked) return;
+            const input = document.getElementById('cmdInput');
+            const val = input.value.trim();
             if(!val) return;
-            log(`Filing: ${val}`, "t-cyan");
+
+            addLog(`Executing: ${val}`, "t-cyan");
             
             try {
-                // RAPID-FIRE BURST: Trigger twice to ensure Google hears it
+                // Rapid-Fire Relay to bypass Google latency
                 await fetch(TARGET, { method: 'GET', mode: 'no-cors' });
                 setTimeout(() => fetch(TARGET, { method: 'GET', mode: 'no-cors' }), 400);
-                log(`Success: Bridge Pulse Sent.`);
-            } catch(e) { log(`Error: Connection Timed Out.`); }
-            document.getElementById('cmdInput').value = "";
+                addLog(`Uplink Confirmed.`, "t-green");
+            } catch(e) { addLog(`Bridge Err: Link Lost.`, "t-red"); }
+
+            input.value = "";
+            startCooldown();
         }
 
         function macro(m) { document.getElementById('cmdInput').value = m; runRelay(); }
 
+        function startCooldown() {
+            isLocked = true;
+            const btn = document.getElementById('execBtn');
+            const fill = document.getElementById('bufFill');
+            const txt = document.getElementById('bufStatus');
+            
+            btn.disabled = true;
+            fill.style.transition = "none";
+            fill.style.width = "100%";
+            void fill.offsetWidth;
+            fill.style.transition = `width ${COOLDOWN_MS}ms linear`;
+            fill.style.width = "0%";
+
+            let rem = COOLDOWN_MS;
+            const tic = setInterval(() => {
+                rem -= 100;
+                txt.innerText = `BUFFER: ${(rem/1000).toFixed(1)}S`;
+                if(rem <= 0) {
+                    clearInterval(tic);
+                    isLocked = false;
+                    btn.disabled = false;
+                    txt.innerText = "BUFFER: READY";
+                    addLog("Buffer Flushed.");
+                }
+            }, 100);
+        }
+
+        // --- DEEP SPORTS ANALYTICS ---
         const APIS = [
-            { id: "NBA", url: "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/scoreboard" },
-            { id: "NCAA", url: "https://site.api.espn.com/apis/site/v2/sports/basketball/mens-college-basketball/scoreboard" },
-            { id: "MLB", url: "https://site.api.espn.com/apis/site/v2/sports/baseball/mlb/scoreboard" },
-            { id: "NHL", url: "https://site.api.espn.com/apis/site/v2/sports/hockey/nhl/scoreboard" },
-            { id: "SOC", url: "https://site.api.espn.com/apis/site/v2/sports/soccer/eng.1/scoreboard" }
+            { id: "NBA", icon: "🏀", url: "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/scoreboard" },
+            { id: "NCAA", icon: "🏀", url: "https://site.api.espn.com/apis/site/v2/sports/basketball/mens-college-basketball/scoreboard" },
+            { id: "MLB", icon: "⚾", url: "https://site.api.espn.com/apis/site/v2/sports/baseball/mlb/scoreboard" },
+            { id: "NHL", icon: "🏒", url: "https://site.api.espn.com/apis/site/v2/sports/hockey/nhl/scoreboard" },
+            { id: "SOC", icon: "⚽", url: "https://site.api.espn.com/apis/site/v2/sports/soccer/eng.1/scoreboard" }
         ];
 
         async function updateMatrix() {
@@ -189,63 +282,94 @@
             for (let api of APIS) {
                 try {
                     let res = await fetch(api.url); let data = await res.json();
-                    data.events.forEach(g => {
-                        if(g.status.type.state === 'in') {
-                            let c = g.competitions[0];
-                            list.push({
-                                id: g.id, l: api.id, clock: g.status.type.detail,
-                                home: { n: c.competitors[0].team.shortDisplayName, s: c.competitors[0].score, i: c.competitors[0].team.logo, r: c.competitors[0].records[0].summary },
-                                away: { n: c.competitors[1].team.shortDisplayName, s: c.competitors[1].score, i: c.competitors[1].team.logo, r: c.competitors[1].records[0].summary }
-                            });
-                        }
-                    });
+                    if(data.events) {
+                        data.events.forEach(g => {
+                            if(g.status.type.state === 'in') {
+                                let c = g.competitions[0];
+                                list.push({
+                                    uid: `${api.id}_${g.id}`, l: api.id, icon: api.icon, clock: g.status.type.detail,
+                                    h: { n: c.competitors[0].team.shortDisplayName, s: parseInt(c.competitors[0].score), i: c.competitors[0].team.logo, r: c.competitors[0].records[0].summary },
+                                    a: { n: c.competitors[1].team.shortDisplayName, s: parseInt(c.competitors[1].score), i: c.competitors[1].team.logo, r: c.competitors[1].records[0].summary }
+                                });
+                            }
+                        });
+                    }
                 } catch(e){}
             }
             render(list);
         }
 
         function render(data) {
-            const m = document.getElementById('matrix');
-            if(data.length === 0) { m.innerHTML = "<div style='color:#444'>NO LIVE TRANSMISSIONS.</div>"; return; }
-            m.innerHTML = data.map(g => `
+            const box = document.getElementById('matrix');
+            if(data.length === 0) { box.innerHTML = "<div style='color:#444; font-weight:800;'>NO ACTIVE TRANSMISSIONS.</div>"; return; }
+            
+            box.innerHTML = data.map(g => `
                 <div class="game-card">
-                    <div class="league-badge">${g.l}</div>
+                    <div class="league-id">${g.l}</div>
                     <div class="team-row">
-                        <div class="team-info"><img src="${g.away.i}" class="logo-frame"><strong>${g.away.n}</strong></div>
-                        <div class="score-val" id="s_${g.id}_a">${g.away.s}</div>
+                        <div class="team-meta"><div class="logo-box"><img src="${g.a.i}" class="logo-img"></div><strong>${g.a.n}</strong></div>
+                        <div class="score-val" id="s_${g.uid}_a">${g.a.s}</div>
                     </div>
                     <div class="team-row">
-                        <div class="team-info"><img src="${g.home.i}" class="logo-frame"><strong>${g.home.n}</strong></div>
-                        <div class="score-val" id="s_${g.id}_h">${g.home.s}</div>
+                        <div class="team-meta"><div class="logo-box"><img src="${g.h.i}" class="logo-img"></div><strong>${g.h.n}</strong></div>
+                        <div class="score-val" id="s_${g.uid}_h">${g.h.s}</div>
                     </div>
-                    <div class="card-footer"><span>${g.away.r} vs ${g.home.r}</span><span>${g.clock}</span></div>
+                    <div class="game-status"><span>${g.a.r} VS ${g.h.r}</span><span>${g.clock}</span></div>
                 </div>
             `).join('');
-            
+
             data.forEach(g => {
-                if(scores[`${g.id}_a`] && scores[`${g.id}_a`] < g.away.s) pop(`s_${g.id}_a`);
-                if(scores[`${g.id}_h`] && scores[`${g.id}_h`] < g.home.s) pop(`s_${g.id}_h`);
-                scores[`${g.id}_a`] = g.away.s; scores[`${g.id}_h`] = g.home.s;
+                // Check for NCAA/NBA Score Animation
+                if(scoreMem[`${g.uid}_a`] && scoreMem[`${g.uid}_a`] < g.a.s) triggerScoreFX(g.l, `s_${g.uid}_a`, g.a.s);
+                if(scoreMem[`${g.uid}_h`] && scoreMem[`${g.uid}_h`] < g.h.s) triggerScoreFX(g.l, `s_${g.uid}_h`, g.h.s);
+                scoreMem[`${g.uid}_a`] = g.a.s; scoreMem[`${g.uid}_h`] = g.h.s;
             });
         }
 
-        function pop(id) { const el = document.getElementById(id); el.classList.add('score-pop'); setTimeout(() => el.classList.remove('score-pop'), 1500); }
+        function triggerScoreFX(league, id, val) {
+            const el = document.getElementById(id);
+            if(el) { el.classList.add('score-pop'); setTimeout(() => el.classList.remove('score-pop'), 1500); }
 
-        // Particle Logic
-        const canvas = document.getElementById('particleCanvas');
-        const ctx = canvas.getContext('2d');
+            // SPRITE OVERLAY
+            const layer = document.getElementById('spriteLayer');
+            const sprite = document.createElement('div');
+            sprite.className = 'score-sprite';
+            
+            if(league === "NBA" || league === "NCAA") sprite.innerText = "🏀";
+            else if(league === "MLB") sprite.innerText = "⚾";
+            else if(league === "SOC") sprite.innerText = "⚽";
+            else sprite.innerText = "🔥";
+
+            layer.appendChild(sprite);
+            setTimeout(() => sprite.remove(), 2500);
+        }
+
+        // --- PARTICLE LOGIC ---
+        const canv = document.getElementById('particleCanvas');
+        const ctx = canv.getContext('2d');
         let pts = [];
         function init() {
-            canvas.width = window.innerWidth; canvas.height = window.innerHeight;
-            for(let i=0; i<100; i++) pts.push({ x: Math.random()*canvas.width, y: Math.random()*canvas.height, s: Math.random()*2, vx: Math.random()*1-0.5, vy: Math.random()*1-0.5 });
+            canv.width = window.innerWidth; canv.height = window.innerHeight;
+            for(let i=0; i<100; i++) pts.push({ x: Math.random()*canv.width, y: Math.random()*canv.height, s: Math.random()*2, vx: Math.random()*1-0.5, vy: Math.random()*1-0.5 });
         }
         function draw() {
-            ctx.clearRect(0,0,canvas.width,canvas.height); ctx.fillStyle = "rgba(0, 243, 255, 0.4)";
-            pts.forEach(p => { p.x+=p.vx; p.y+=p.vy; if(p.x<0||p.x>canvas.width) p.vx*=-1; if(p.y<0||p.y>canvas.height) p.vy*=-1; ctx.beginPath(); ctx.arc(p.x, p.y, p.s, 0, Math.PI*2); ctx.fill(); });
+            ctx.clearRect(0,0,canv.width,canv.height); ctx.fillStyle = "rgba(0, 243, 255, 0.4)";
+            pts.forEach(p => { p.x+=p.vx; p.y+=p.vy; if(p.x<0||p.x>canv.width) p.vx*=-1; if(p.y<0||p.y>canv.height) p.vy*=-1; ctx.beginPath(); ctx.arc(p.x, p.y, p.s, 0, Math.PI*2); ctx.fill(); });
             requestAnimationFrame(draw);
         }
         init(); draw();
         
+        // --- HARDWARE SIM ---
+        setInterval(() => {
+            const cpu = (Math.random()*20 + 30).toFixed(0);
+            const temp = (Math.random()*10 + 40).toFixed(1);
+            document.getElementById('cpuVal').innerText = cpu + "%";
+            document.getElementById('cpuBar').style.width = cpu + "%";
+            document.getElementById('tempVal').innerText = temp + "°C";
+            if(temp > 50) document.getElementById('tempVal').style.color = "var(--red)";
+            else document.getElementById('tempVal').style.color = "var(--amber)";
+        }, 2000);
+
         setInterval(() => {
             const d = new Date(); document.getElementById('clock').innerText = d.toLocaleTimeString('en-US', {hour12:false}) + "." + d.getMilliseconds();
         }, 50);
