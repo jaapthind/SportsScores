@@ -1,431 +1,265 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Universal Sports Scoreboard</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEXUS APEX // THE SINGULARITY</title>
+    <style>
+        :root {
+            --glass: rgba(5, 8, 15, 0.9);
+            --border: rgba(255, 255, 255, 0.18);
+            --cyan: #00f3ff;
+            --gold: #ffcf40;
+            --magenta: #ff007f;
+            --blur: blur(80px) saturate(220%);
+            --font-mono: 'JetBrains Mono', monospace;
+        }
 
-<style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'SF Pro Display', -apple-system, sans-serif; user-select: none; }
+        body { background: #000; color: #fff; overflow: hidden; height: 100vh; position: relative; }
 
-body{
-background:#0b0b0b;
-color:white;
-font-family:Arial;
-text-align:center;
-}
+        /* --- STADIUM THEATER (ISOLATED Z-AXIS) --- */
+        #stadiumTheater {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            z-index: 100000; pointer-events: none; display: none;
+            background: radial-gradient(circle at center, rgba(0,0,0,0.3) 0%, #000 100%);
+        }
+        #arenaCanvas { width: 100%; height: 100%; image-rendering: -webkit-optimize-contrast; }
 
-#searchBar{
-width:500px;
-padding:10px;
-font-size:18px;
-margin:20px;
-}
+        /* --- GLOBAL HEADER --- */
+        header {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100px;
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 0 50px; z-index: 1000; background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(40px); border-bottom: 2px solid var(--border);
+        }
+        #sysClock { font-family: var(--font-mono); font-weight: 900; color: var(--cyan); font-size: 1.1rem; }
 
-#tabs{
-margin:10px;
-}
+        /* --- MASTER LAYOUT --- */
+        .layout {
+            display: grid; grid-template-columns: 460px 1fr; gap: 30px;
+            padding: 130px 30px 30px 30px; height: 100vh; position: relative; z-index: 10;
+        }
 
-.tab{
-padding:10px 15px;
-background:#222;
-display:inline-block;
-cursor:pointer;
-margin:3px;
-}
+        .panel {
+            background: var(--glass); backdrop-filter: var(--blur); -webkit-backdrop-filter: var(--blur);
+            border: 1px solid var(--border); border-top: 2px solid rgba(255,255,255,0.3);
+            border-radius: 45px; display: flex; flex-direction: column; overflow: hidden;
+            box-shadow: 0 60px 120px rgba(0,0,0,1);
+        }
 
-#scoreboard{
-margin-top:10px;
-font-size:28px;
-}
+        .panel-body { padding: 40px; overflow-y: auto; flex-grow: 1; display: flex; flex-direction: column; gap: 35px; }
 
-#games{
-margin-top:10px;
-}
+        /* --- BROADCAST RELAY TERMINAL --- */
+        .nexus-input {
+            width: 100%; background: rgba(0,0,0,0.5); border: 3px solid var(--border);
+            color: #fff; padding: 25px; border-radius: 20px; outline: none; font-size: 1.2rem;
+            font-family: var(--font-mono); text-align: center; transition: 0.3s;
+        }
+        .nexus-input:focus { border-color: var(--cyan); box-shadow: 0 0 30px rgba(0,243,255,0.2); }
+        
+        .btn-broadcast {
+            background: var(--cyan); color: #000; padding: 25px; border-radius: 20px;
+            font-weight: 950; text-transform: uppercase; border: none; cursor: pointer;
+            transition: 0.3s; font-size: 1.1rem; letter-spacing: 2px;
+        }
+        .btn-broadcast:hover { transform: translateY(-3px); box-shadow: 0 0 50px var(--cyan); }
 
-.game{
-background:#111;
-padding:8px;
-margin:5px;
-}
+        /* --- TELEMETRY ENGINE --- */
+        .matrix { display: grid; grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)); gap: 30px; }
+        .card {
+            background: rgba(255,255,255,0.03); border: 2px solid var(--border); border-radius: 40px;
+            padding: 30px; transition: 0.5s; position: relative; overflow: hidden;
+        }
+        .card:hover { border-color: var(--cyan); transform: translateY(-10px); background: rgba(255,255,255,0.05); }
+        
+        .score-val { font-size: 3rem; font-weight: 950; font-family: var(--font-mono); }
+        .logo-frame { width: 60px; height: 60px; background: #fff; border-radius: 50%; padding: 8px; border: 3px solid transparent; }
+        .possession { border-color: var(--cyan); box-shadow: 0 0 30px var(--cyan); }
 
-#arena{
-margin:auto;
-width:1000px;
-position:relative;
-}
+        .meta-footer {
+            margin-top: 20px; padding-top: 20px; border-top: 1.5px solid rgba(255,255,255,0.05);
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .live-clock { color: var(--cyan); font-family: var(--font-mono); font-weight: 900; }
 
-canvas{
-background:#c68642;
-border:5px solid #222;
-border-radius:10px;
-}
-
-.flash{
-position:absolute;
-top:0;
-left:0;
-width:100%;
-height:100%;
-background:white;
-opacity:0;
-pointer-events:none;
-}
-
-.scoreEffect{
-position:absolute;
-font-size:60px;
-color:yellow;
-animation:pop 1s forwards;
-}
-
-@keyframes pop{
-0%{transform:scale(0.3);opacity:1}
-100%{transform:scale(2);opacity:0}
-}
-
-</style>
+        #logTerm { background: rgba(0,0,0,0.6); border-radius: 30px; padding: 25px; font-family: var(--font-mono); font-size: 0.8rem; color: #444; height: 280px; overflow-y: auto; border: 1.5px solid var(--border); }
+    </style>
 </head>
-
 <body>
 
-<h1>Universal Sports Scoreboard</h1>
-
-<input id="searchBar" placeholder="Search teams (Google style)">
-
-<div id="tabs">
-
-<div class="tab" onclick="loadSport('nba')">NBA</div>
-<div class="tab" onclick="loadSport('ncaam')">NCAA M</div>
-<div class="tab" onclick="loadSport('ncaaw')">NCAA W</div>
-<div class="tab" onclick="loadSport('mlb')">MLB</div>
-<div class="tab" onclick="loadSport('soccer')">Soccer</div>
-
-</div>
-
-<div id="games"></div>
-
-<h2>Basketball Animation Engine</h2>
-
-<div id="arena">
-
-<canvas id="court" width="1000" height="500"></canvas>
-
-<div id="flash" class="flash"></div>
-
-</div>
-
-<button onclick="simulatePlay()">Simulate Basketball Play</button>
-
-<script>
-
-//////////////////////////////////////////////////////////
-// SPORT DATABASE (placeholder)
-//////////////////////////////////////////////////////////
-
-const sportsData={
-
-nba:[
-{home:"Lakers",away:"Warriors",score:"102-99"},
-{home:"Celtics",away:"Heat",score:"88-85"}
-],
-
-ncaam:[
-{home:"Duke",away:"UNC",score:"75-73"}
-],
-
-ncaaw:[
-{home:"Iowa",away:"UConn",score:"66-62"}
-],
-
-mlb:[
-{home:"Dodgers",away:"Giants",score:"4-2"}
-],
-
-soccer:[
-{home:"Barcelona",away:"Madrid",score:"2-1"}
-]
-
-}
-
-//////////////////////////////////////////////////////////
-// LOAD SPORT SCOREBOARD
-//////////////////////////////////////////////////////////
-
-function loadSport(sport){
-
-let container=document.getElementById("games")
-
-container.innerHTML=""
-
-sportsData[sport].forEach(g=>{
-
-let div=document.createElement("div")
-
-div.className="game"
-
-div.innerHTML=g.away+" @ "+g.home+" | "+g.score
-
-container.appendChild(div)
-
-})
-
-}
-
-loadSport("nba")
-
-//////////////////////////////////////////////////////////
-// GOOGLE STYLE SEARCH
-//////////////////////////////////////////////////////////
-
-document.getElementById("searchBar").addEventListener("input",e=>{
-
-let q=e.target.value.toLowerCase()
-
-let results=[]
-
-Object.values(sportsData).forEach(list=>{
-
-list.forEach(g=>{
-
-if(g.home.toLowerCase().includes(q)||g.away.toLowerCase().includes(q))
-results.push(g)
-
-})
-
-})
-
-let container=document.getElementById("games")
-
-container.innerHTML=""
-
-results.forEach(g=>{
-
-let div=document.createElement("div")
-
-div.className="game"
-
-div.innerHTML=g.away+" @ "+g.home+" | "+g.score
-
-container.appendChild(div)
-
-})
-
-})
-
-//////////////////////////////////////////////////////////
-// CANVAS BASKETBALL ENGINE
-//////////////////////////////////////////////////////////
-
-const canvas=document.getElementById("court")
-const ctx=canvas.getContext("2d")
-
-let ball={
-x:100,
-y:400,
-vx:0,
-vy:0
-}
-
-let players=[
-{name:"Shooter",x:200,y:350},
-{name:"Defender",x:300,y:350}
-]
-
-//////////////////////////////////////////////////////////
-// DRAW COURT
-//////////////////////////////////////////////////////////
-
-function drawCourt(){
-
-ctx.clearRect(0,0,canvas.width,canvas.height)
-
-ctx.fillStyle="#c68642"
-ctx.fillRect(0,0,canvas.width,canvas.height)
-
-ctx.strokeStyle="white"
-
-ctx.beginPath()
-ctx.arc(500,250,80,0,Math.PI*2)
-ctx.stroke()
-
-ctx.beginPath()
-ctx.arc(500,70,240,0,Math.PI)
-ctx.stroke()
-
-}
-
-//////////////////////////////////////////////////////////
-// DRAW PLAYERS
-//////////////////////////////////////////////////////////
-
-function drawPlayers(){
-
-players.forEach(p=>{
-
-ctx.fillStyle="blue"
-
-ctx.beginPath()
-ctx.arc(p.x,p.y,15,0,Math.PI*2)
-ctx.fill()
-
-})
-
-}
-
-//////////////////////////////////////////////////////////
-// DRAW BALL
-//////////////////////////////////////////////////////////
-
-function drawBall(){
-
-ctx.fillStyle="orange"
-
-ctx.beginPath()
-ctx.arc(ball.x,ball.y,10,0,Math.PI*2)
-ctx.fill()
-
-}
-
-//////////////////////////////////////////////////////////
-// BALL PHYSICS
-//////////////////////////////////////////////////////////
-
-function updateBall(){
-
-ball.x+=ball.vx
-ball.y+=ball.vy
-
-ball.vy+=0.3
-
-}
-
-//////////////////////////////////////////////////////////
-// RENDER LOOP
-//////////////////////////////////////////////////////////
-
-function render(){
-
-drawCourt()
-
-drawPlayers()
-
-drawBall()
-
-updateBall()
-
-requestAnimationFrame(render)
-
-}
-
-render()
-
-//////////////////////////////////////////////////////////
-// SHOT TYPES
-//////////////////////////////////////////////////////////
-
-function dunk(){
-
-ball.vx=(500-ball.x)/15
-ball.vy=-4
-
-}
-
-function layup(){
-
-ball.vx=(500-ball.x)/25
-ball.vy=-6
-
-}
-
-function jumper(){
-
-ball.vx=(500-ball.x)/30
-ball.vy=-8
-
-}
-
-//////////////////////////////////////////////////////////
-// CROWD FLASH
-//////////////////////////////////////////////////////////
-
-function crowdFlash(){
-
-let f=document.getElementById("flash")
-
-f.style.opacity=0.8
-
-setTimeout(()=>{
-f.style.opacity=0
-},150)
-
-}
-
-//////////////////////////////////////////////////////////
-// SCORE EFFECT
-//////////////////////////////////////////////////////////
-
-function scoreExplosion(points){
-
-let e=document.createElement("div")
-
-e.className="scoreEffect"
-
-e.innerText="+"+points
-
-e.style.left="450px"
-e.style.top="200px"
-
-document.getElementById("arena").appendChild(e)
-
-setTimeout(()=>e.remove(),1000)
-
-}
-
-//////////////////////////////////////////////////////////
-// REPLAY SLOW MOTION
-//////////////////////////////////////////////////////////
-
-function replay(){
-
-ball.vx*=0.3
-ball.vy*=0.3
-
-setTimeout(()=>{
-ball.vx*=3
-ball.vy*=3
-},1500)
-
-}
-
-//////////////////////////////////////////////////////////
-// SIMULATE BASKETBALL PLAY
-//////////////////////////////////////////////////////////
-
-function simulatePlay(){
-
-let plays=["dunk","layup","jumper"]
-
-let play=plays[Math.floor(Math.random()*plays.length)]
-
-ball.x=200
-ball.y=350
-
-if(play=="dunk") dunk()
-if(play=="layup") layup()
-if(play=="jumper") jumper()
-
-setTimeout(()=>{
-
-crowdFlash()
-
-scoreExplosion(play=="jumper"?3:2)
-
-replay()
-
-},1200)
-
-}
-
-</script>
-
+    <div id="stadiumTheater"><canvas id="arenaCanvas"></canvas></div>
+
+    <header>
+        <div style="font-weight: 900; font-size: 1.8rem; letter-spacing: -2px;">NEXUS <span style="color:var(--cyan);">SINGULARITY</span></div>
+        <div id="sysClock">00:00:00.000</div>
+    </header>
+
+    <div class="layout">
+        <div class="panel">
+            <div class="panel-body">
+                <div style="font-size: 1.2rem; font-weight: 950;">Broadcast Relay Node</div>
+                <input type="text" id="relayMsg" class="nexus-input" placeholder="Message to Google Home...">
+                <button class="btn-broadcast" onclick="executeRelay()">Initiate Uplink</button>
+                <div id="logTerm">> KERNEL v40.0 SINGULARITY ONLINE.<br>> MULTI-SPORT SATELLITE SYNCED.</div>
+            </div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-body">
+                <div class="matrix" id="matrix"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 🔴 GOOGLE HOME RELAY (ACTUAL FETCH) 🔴
+        const SCRYPTED_WEBHOOK = "https://pets-hdtv-enormous-objects.trycloudflare.com/endpoint/@scrypted/webhook/public/33/fe2475e0d68cf025/turnOn";
+        
+        let scoreState = {};
+        let localClocks = {};
+
+        async function executeRelay() {
+            const input = document.getElementById('relayMsg');
+            const val = input.value.trim();
+            if(!val) return;
+            
+            try {
+                // RAPID-FIRE BURST (Ensures Google Routine picks up)
+                await fetch(SCRYPTED_WEBHOOK, { method: 'GET', mode: 'no-cors' });
+                setTimeout(() => fetch(SCRYPTED_WEBHOOK, { method: 'GET', mode: 'no-cors' }), 450);
+                document.getElementById('logTerm').innerHTML += `<br>> Broadcast Fired: ${val}`;
+            } catch(e) {
+                document.getElementById('logTerm').innerHTML += `<br>> Relay Error: Link Lost.`;
+            }
+            input.value = "";
+        }
+
+        const APIS = [
+            { id: "NBA", url: "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/scoreboard" },
+            { id: "NCAA", url: "https://site.api.espn.com/apis/site/v2/sports/basketball/mens-college-basketball/scoreboard" },
+            { id: "MLB", url: "https://site.api.espn.com/apis/site/v2/sports/baseball/mlb/scoreboard" }
+        ];
+
+        async function pollTelemetry() {
+            let active = [];
+            for (let api of APIS) {
+                try {
+                    let r = await fetch(api.url); let j = await r.json();
+                    j.events.forEach(e => {
+                        if(e.status.type.state === 'in') {
+                            let c = e.competitions[0];
+                            let game = {
+                                id: e.id, l: api.id, clock: e.status.displayClock,
+                                play: c.situation?.lastPlay?.text || "Synchronizing...",
+                                athleteId: c.situation?.lastPlay?.athletes?.[0]?.id || null,
+                                pos: c.situation?.possession || null,
+                                h: { n: c.competitors[0].team.shortDisplayName, s: parseInt(c.competitors[0].score), i: c.competitors[0].team.logo },
+                                a: { n: c.competitors[1].team.shortDisplayName, s: parseInt(c.competitors[1].score), i: c.competitors[1].team.logo }
+                            };
+                            active.push(game);
+                            syncClock(game.id, game.clock);
+                        }
+                    });
+                } catch(e){}
+            }
+            renderMatrix(active);
+        }
+
+        function renderMatrix(games) {
+            const m = document.getElementById('matrix');
+            if(games.length === 0) { m.innerHTML = "AWAITING LIVE TRANSMISSIONS..."; return; }
+            m.innerHTML = games.map(g => `
+                <div class="card">
+                    <div style="font-size:0.7rem; font-weight:900; color:#444; margin-bottom:15px;">${g.l} TELEMETRY</div>
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                        <div style="display:flex; align-items:center; gap:15px;">
+                            <div class="logo-frame ${g.pos == g.a.id ? 'possession' : ''}"><img src="${g.a.i}" style="width:100%;height:100%;object-fit:contain;"></div>
+                            <strong>${g.a.n}</strong>
+                        </div>
+                        <div class="score-val">${g.a.s}</div>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <div style="display:flex; align-items:center; gap:15px;">
+                            <div class="logo-frame ${g.pos == g.h.id ? 'possession' : ''}"><img src="${g.h.i}" style="width:100%;height:100%;object-fit:contain;"></div>
+                            <strong>${g.h.n}</strong>
+                        </div>
+                        <div class="score-val">${g.h.s}</div>
+                    </div>
+                    <div class="meta-footer">
+                        <div class="live-clock" id="t_${g.id}">${g.clock}</div>
+                        <div style="font-size:0.65rem; color:#444; font-style:italic;">${g.play}</div>
+                    </div>
+                </div>
+            `).join('');
+
+            games.forEach(g => {
+                if(scoreState[`${g.id}_a`] < g.a.s) triggerIMAX(g);
+                if(scoreState[`${g.id}_h`] < g.h.s) triggerIMAX(g);
+                scoreState[`${g.id}_a`] = g.a.s; scoreState[`${g.id}_h`] = g.h.s;
+            });
+        }
+
+        // --- PHOTOREALISTIC IMAX ENGINE ---
+        const canvas = document.getElementById('arenaCanvas');
+        const ctx = canvas.getContext('2d');
+        const athleteImg = new Image(); athleteImg.crossOrigin = "anonymous";
+        const ballImg = new Image(); ballImg.src = 'https://i.imgur.com/vHqC6M7.png';
+        const courtImg = new Image(); courtImg.src = 'https://images.unsplash.com/photo-1544910368-515479bb30a5?q=80&w=2070';
+
+        function triggerIMAX(game) {
+            if(game.l === "MLB") return; // Only Basketball for theater
+            const stage = document.getElementById('stadiumTheater');
+            stage.style.display = 'block';
+            canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+            
+            athleteImg.src = game.athleteId ? `https://a.espncdn.com/i/headshots/nba/players/full/${game.athleteId}.png` : `https://a.espncdn.com/i/teamlogos/default-team-logo-500.png`;
+            athleteImg.onload = () => runPhysics(game.play.includes("three") || game.play.includes("foot"));
+        }
+
+        function runPhysics(isThree) {
+            let f = 0; const rimX = canvas.width * 0.85; const rimY = canvas.height * 0.35;
+            let pX = isThree ? 200 : 500;
+            let ball = { x: pX + 150, y: canvas.height * 0.7, vx: (rimX - 60 - pX)/60, vy: isThree ? -32 : -22, r: 0 };
+
+            function anim() {
+                ctx.clearRect(0,0,canvas.width,canvas.height);
+                ctx.drawImage(courtImg, 0, canvas.height * 0.8, canvas.width, canvas.height * 0.2);
+                ctx.strokeStyle = "#ff4500"; ctx.lineWidth = 10;
+                ctx.beginPath(); ctx.arc(rimX - 40, rimY + 80, 25, 0, Math.PI); ctx.stroke();
+                
+                let jump = (f > 20 && f < 60) ? -100 : 0;
+                ctx.drawImage(athleteImg, pX, canvas.height * 0.7 + jump - 220, 320, 320);
+
+                if(f > 45) {
+                    ball.x += ball.vx; ball.y += ball.vy; ball.vy += 0.75; ball.r += 0.3;
+                    ctx.save(); ctx.translate(ball.x, ball.y); ctx.rotate(ball.r);
+                    ctx.drawImage(ballImg, -25, -25, 50, 50); ctx.restore();
+                }
+                f++;
+                if(f < 130) requestAnimationFrame(anim);
+                else document.getElementById('stadiumTheater').style.display = 'none';
+            }
+            anim();
+        }
+
+        function syncClock(id, raw) {
+            if(!raw || !raw.includes(":")) return;
+            let pts = raw.split(":"); let t = (parseInt(pts[0])*60) + parseInt(pts[1]);
+            if(!localClocks[id] || Math.abs(localClocks[id]-t) > 5) localClocks[id] = t;
+        }
+        setInterval(() => {
+            for(let id in localClocks) {
+                if(localClocks[id] > 0) {
+                    localClocks[id]--;
+                    let m = Math.floor(localClocks[id]/60); let s = String(localClocks[id]%60).padStart(2,'0');
+                    let el = document.getElementById(`t_${id}`); if(el && !el.innerText.includes("End")) el.innerText = `${m}:${s}`;
+                }
+            }
+        }, 1000);
+
+        pollTelemetry(); setInterval(pollTelemetry, 15000);
+        setInterval(() => { const d = new Date(); document.getElementById('sysClock').innerText = d.toLocaleTimeString('en-US', {hour12:false}) + "." + d.getMilliseconds(); }, 50);
+    </script>
 </body>
 </html>
