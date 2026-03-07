@@ -2,64 +2,61 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>NBA Game Engine</title>
+<title>Universal Sports Scoreboard</title>
 
 <style>
 
 body{
-background:#0d0d0d;
+background:#0b0b0b;
 color:white;
 font-family:Arial;
 text-align:center;
 }
 
-#scoreboard{
-font-size:34px;
-margin-bottom:10px;
+#searchBar{
+width:500px;
+padding:10px;
+font-size:18px;
+margin:20px;
 }
 
-.logo{
-width:70px;
-vertical-align:middle;
+#tabs{
+margin:10px;
+}
+
+.tab{
+padding:10px 15px;
+background:#222;
+display:inline-block;
+cursor:pointer;
+margin:3px;
+}
+
+#scoreboard{
+margin-top:10px;
+font-size:28px;
+}
+
+#games{
+margin-top:10px;
+}
+
+.game{
+background:#111;
+padding:8px;
+margin:5px;
 }
 
 #arena{
-width:1000px;
 margin:auto;
+width:1000px;
 position:relative;
 }
 
 canvas{
 background:#c68642;
-border:6px solid #222;
+border:5px solid #222;
 border-radius:10px;
-}
-
-#playlog{
-height:150px;
-overflow:auto;
-background:#111;
-margin-top:10px;
-padding:5px;
-font-size:14px;
-}
-
-button{
-padding:10px;
-font-size:18px;
-margin:10px;
-}
-
-.scoreEffect{
-position:absolute;
-font-size:70px;
-color:yellow;
-animation:pop 1s forwards;
-}
-
-@keyframes pop{
-0%{transform:scale(0.2);opacity:1}
-100%{transform:scale(2);opacity:0}
 }
 
 .flash{
@@ -73,24 +70,40 @@ opacity:0;
 pointer-events:none;
 }
 
+.scoreEffect{
+position:absolute;
+font-size:60px;
+color:yellow;
+animation:pop 1s forwards;
+}
+
+@keyframes pop{
+0%{transform:scale(0.3);opacity:1}
+100%{transform:scale(2);opacity:0}
+}
+
 </style>
 </head>
 
 <body>
 
-<h1>🏀 NBA Game Visualizer</h1>
+<h1>Universal Sports Scoreboard</h1>
 
-<div id="scoreboard">
+<input id="searchBar" placeholder="Search teams (Google style)">
 
-<img id="logoA" class="logo">
-<span id="scoreA">0</span>
+<div id="tabs">
 
-VS
-
-<span id="scoreB">0</span>
-<img id="logoB" class="logo">
+<div class="tab" onclick="loadSport('nba')">NBA</div>
+<div class="tab" onclick="loadSport('ncaam')">NCAA M</div>
+<div class="tab" onclick="loadSport('ncaaw')">NCAA W</div>
+<div class="tab" onclick="loadSport('mlb')">MLB</div>
+<div class="tab" onclick="loadSport('soccer')">Soccer</div>
 
 </div>
+
+<div id="games"></div>
+
+<h2>Basketball Animation Engine</h2>
 
 <div id="arena">
 
@@ -100,70 +113,107 @@ VS
 
 </div>
 
-<button onclick="simulatePlay()">Simulate Play</button>
-
-<div id="playlog"></div>
+<button onclick="simulatePlay()">Simulate Basketball Play</button>
 
 <script>
 
-////////////////////////////////////////////////
-// TEAM DATA
-////////////////////////////////////////////////
+//////////////////////////////////////////////////////////
+// SPORT DATABASE (placeholder)
+//////////////////////////////////////////////////////////
 
-const teams={
-LAL:{
-name:"Lakers",
-logo:"https://cdn.nba.com/logos/nba/1610612747/global/L/logo.svg",
-players:["LeBron James","Anthony Davis","D'Angelo Russell"]
-},
-GSW:{
-name:"Warriors",
-logo:"https://cdn.nba.com/logos/nba/1610612744/global/L/logo.svg",
-players:["Stephen Curry","Klay Thompson","Draymond Green"]
-}
-}
+const sportsData={
 
-document.getElementById("logoA").src=teams.LAL.logo
-document.getElementById("logoB").src=teams.GSW.logo
+nba:[
+{home:"Lakers",away:"Warriors",score:"102-99"},
+{home:"Celtics",away:"Heat",score:"88-85"}
+],
 
-////////////////////////////////////////////////
-// GAME STATE
-////////////////////////////////////////////////
+ncaam:[
+{home:"Duke",away:"UNC",score:"75-73"}
+],
 
-let score={
-LAL:0,
-GSW:0
-}
+ncaaw:[
+{home:"Iowa",away:"UConn",score:"66-62"}
+],
 
-let stats={
-players:{},
-teams:{
-LAL:{points:0,shots:0,threes:0,dunks:0},
-GSW:{points:0,shots:0,threes:0,dunks:0}
-}
+mlb:[
+{home:"Dodgers",away:"Giants",score:"4-2"}
+],
+
+soccer:[
+{home:"Barcelona",away:"Madrid",score:"2-1"}
+]
+
 }
 
-////////////////////////////////////////////////
-// PLAYER STATS INIT
-////////////////////////////////////////////////
+//////////////////////////////////////////////////////////
+// LOAD SPORT SCOREBOARD
+//////////////////////////////////////////////////////////
 
-function initStats(){
+function loadSport(sport){
 
-teams.LAL.players.forEach(p=>{
-stats.players[p]={pts:0,shots:0,threes:0}
+let container=document.getElementById("games")
+
+container.innerHTML=""
+
+sportsData[sport].forEach(g=>{
+
+let div=document.createElement("div")
+
+div.className="game"
+
+div.innerHTML=g.away+" @ "+g.home+" | "+g.score
+
+container.appendChild(div)
+
 })
 
-teams.GSW.players.forEach(p=>{
-stats.players[p]={pts:0,shots:0,threes:0}
-})
-
 }
 
-initStats()
+loadSport("nba")
 
-////////////////////////////////////////////////
-// CANVAS ENGINE
-////////////////////////////////////////////////
+//////////////////////////////////////////////////////////
+// GOOGLE STYLE SEARCH
+//////////////////////////////////////////////////////////
+
+document.getElementById("searchBar").addEventListener("input",e=>{
+
+let q=e.target.value.toLowerCase()
+
+let results=[]
+
+Object.values(sportsData).forEach(list=>{
+
+list.forEach(g=>{
+
+if(g.home.toLowerCase().includes(q)||g.away.toLowerCase().includes(q))
+results.push(g)
+
+})
+
+})
+
+let container=document.getElementById("games")
+
+container.innerHTML=""
+
+results.forEach(g=>{
+
+let div=document.createElement("div")
+
+div.className="game"
+
+div.innerHTML=g.away+" @ "+g.home+" | "+g.score
+
+container.appendChild(div)
+
+})
+
+})
+
+//////////////////////////////////////////////////////////
+// CANVAS BASKETBALL ENGINE
+//////////////////////////////////////////////////////////
 
 const canvas=document.getElementById("court")
 const ctx=canvas.getContext("2d")
@@ -175,11 +225,14 @@ vx:0,
 vy:0
 }
 
-let players=[]
+let players=[
+{name:"Shooter",x:200,y:350},
+{name:"Defender",x:300,y:350}
+]
 
-////////////////////////////////////////////////
+//////////////////////////////////////////////////////////
 // DRAW COURT
-////////////////////////////////////////////////
+//////////////////////////////////////////////////////////
 
 function drawCourt(){
 
@@ -189,27 +242,26 @@ ctx.fillStyle="#c68642"
 ctx.fillRect(0,0,canvas.width,canvas.height)
 
 ctx.strokeStyle="white"
-ctx.lineWidth=4
 
 ctx.beginPath()
 ctx.arc(500,250,80,0,Math.PI*2)
 ctx.stroke()
 
 ctx.beginPath()
-ctx.arc(500,60,240,0,Math.PI)
+ctx.arc(500,70,240,0,Math.PI)
 ctx.stroke()
 
 }
 
-////////////////////////////////////////////////
+//////////////////////////////////////////////////////////
 // DRAW PLAYERS
-////////////////////////////////////////////////
+//////////////////////////////////////////////////////////
 
 function drawPlayers(){
 
 players.forEach(p=>{
 
-ctx.fillStyle=p.team=="LAL"?"purple":"blue"
+ctx.fillStyle="blue"
 
 ctx.beginPath()
 ctx.arc(p.x,p.y,15,0,Math.PI*2)
@@ -219,41 +271,43 @@ ctx.fill()
 
 }
 
-////////////////////////////////////////////////
+//////////////////////////////////////////////////////////
 // DRAW BALL
-////////////////////////////////////////////////
+//////////////////////////////////////////////////////////
 
 function drawBall(){
 
 ctx.fillStyle="orange"
 
 ctx.beginPath()
-ctx.arc(ball.x,ball.y,8,0,Math.PI*2)
+ctx.arc(ball.x,ball.y,10,0,Math.PI*2)
 ctx.fill()
 
 }
 
-////////////////////////////////////////////////
-// PHYSICS UPDATE
-////////////////////////////////////////////////
+//////////////////////////////////////////////////////////
+// BALL PHYSICS
+//////////////////////////////////////////////////////////
 
 function updateBall(){
 
 ball.x+=ball.vx
 ball.y+=ball.vy
 
-ball.vy+=0.2
+ball.vy+=0.3
 
 }
 
-////////////////////////////////////////////////
+//////////////////////////////////////////////////////////
 // RENDER LOOP
-////////////////////////////////////////////////
+//////////////////////////////////////////////////////////
 
 function render(){
 
 drawCourt()
+
 drawPlayers()
+
 drawBall()
 
 updateBall()
@@ -264,104 +318,36 @@ requestAnimationFrame(render)
 
 render()
 
-////////////////////////////////////////////////
-// PLAYER SETUP
-////////////////////////////////////////////////
+//////////////////////////////////////////////////////////
+// SHOT TYPES
+//////////////////////////////////////////////////////////
 
-function spawnPlayers(){
+function dunk(){
 
-players=[]
-
-teams.LAL.players.forEach((p,i)=>{
-
-players.push({
-name:p,
-team:"LAL",
-x:200,
-y:150+70*i
-})
-
-})
-
-teams.GSW.players.forEach((p,i)=>{
-
-players.push({
-name:p,
-team:"GSW",
-x:800,
-y:150+70*i
-})
-
-})
+ball.vx=(500-ball.x)/15
+ball.vy=-4
 
 }
 
-spawnPlayers()
+function layup(){
 
-////////////////////////////////////////////////
-// PLAY PARSER
-////////////////////////////////////////////////
-
-function parsePlay(text){
-
-let player=null
-
-Object.values(teams).forEach(t=>{
-t.players.forEach(p=>{
-if(text.includes(p)) player=p
-})
-})
-
-let distance=text.match(/([0-9]+)ft/)
-distance=distance?parseInt(distance[1]):10
-
-let type="jumper"
-if(text.includes("dunk")) type="dunk"
-if(text.includes("layup")) type="layup"
-
-let points=distance>=24?3:2
-
-return{
-player,
-distance,
-type,
-points
-}
+ball.vx=(500-ball.x)/25
+ball.vy=-6
 
 }
 
-////////////////////////////////////////////////
-// SHOT ANIMATION
-////////////////////////////////////////////////
-
-function shootBall(player){
-
-ball.x=player.x
-ball.y=player.y
+function jumper(){
 
 ball.vx=(500-ball.x)/30
 ball.vy=-8
 
 }
 
-////////////////////////////////////////////////
-// SCORE UPDATE
-////////////////////////////////////////////////
-
-function updateScore(team,points){
-
-score[team]+=points
-
-document.getElementById("scoreA").innerText=score.LAL
-document.getElementById("scoreB").innerText=score.GSW
-
-}
-
-////////////////////////////////////////////////
+//////////////////////////////////////////////////////////
 // CROWD FLASH
-////////////////////////////////////////////////
+//////////////////////////////////////////////////////////
 
-function flashCrowd(){
+function crowdFlash(){
 
 let f=document.getElementById("flash")
 
@@ -369,19 +355,20 @@ f.style.opacity=0.8
 
 setTimeout(()=>{
 f.style.opacity=0
-},120)
+},150)
 
 }
 
-////////////////////////////////////////////////
+//////////////////////////////////////////////////////////
 // SCORE EFFECT
-////////////////////////////////////////////////
+//////////////////////////////////////////////////////////
 
 function scoreExplosion(points){
 
 let e=document.createElement("div")
 
 e.className="scoreEffect"
+
 e.innerText="+"+points
 
 e.style.left="450px"
@@ -393,83 +380,46 @@ setTimeout(()=>e.remove(),1000)
 
 }
 
-////////////////////////////////////////////////
+//////////////////////////////////////////////////////////
 // REPLAY SLOW MOTION
-////////////////////////////////////////////////
+//////////////////////////////////////////////////////////
 
 function replay(){
-
-let originalVX=ball.vx
-let originalVY=ball.vy
 
 ball.vx*=0.3
 ball.vy*=0.3
 
 setTimeout(()=>{
-ball.vx=originalVX
-ball.vy=originalVY
+ball.vx*=3
+ball.vy*=3
 },1500)
 
 }
 
-////////////////////////////////////////////////
-// PLAY LOG
-////////////////////////////////////////////////
-
-function log(text){
-
-let log=document.getElementById("playlog")
-
-log.innerHTML=text+"<br>"+log.innerHTML
-
-}
-
-////////////////////////////////////////////////
-// PLAY SIMULATION
-////////////////////////////////////////////////
+//////////////////////////////////////////////////////////
+// SIMULATE BASKETBALL PLAY
+//////////////////////////////////////////////////////////
 
 function simulatePlay(){
 
-let plays=[
-
-"Stephen Curry 28ft 3PT jumper",
-"LeBron James 4ft dunk",
-"Anthony Davis 6ft layup",
-"Klay Thompson 25ft 3PT jumper"
-
-]
+let plays=["dunk","layup","jumper"]
 
 let play=plays[Math.floor(Math.random()*plays.length)]
 
-let parsed=parsePlay(play)
+ball.x=200
+ball.y=350
 
-let playerObj=players.find(p=>p.name==parsed.player)
-
-shootBall(playerObj)
-
-let team=teams.LAL.players.includes(parsed.player)?"LAL":"GSW"
+if(play=="dunk") dunk()
+if(play=="layup") layup()
+if(play=="jumper") jumper()
 
 setTimeout(()=>{
 
-updateScore(team,parsed.points)
+crowdFlash()
 
-stats.players[parsed.player].pts+=parsed.points
-stats.players[parsed.player].shots++
-
-stats.teams[team].points+=parsed.points
-stats.teams[team].shots++
-
-if(parsed.points==3) stats.teams[team].threes++
-
-if(parsed.type=="dunk") stats.teams[team].dunks++
-
-scoreExplosion(parsed.points)
-
-flashCrowd()
+scoreExplosion(play=="jumper"?3:2)
 
 replay()
-
-log(play)
 
 },1200)
 
