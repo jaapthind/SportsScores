@@ -220,25 +220,25 @@ body,html{width:100vw;height:100vh;overflow:hidden;background:#030407;color:#fff
 .sbp-text.scoring{color:var(--accent-gold);}
 .sbp-score{font-family:'Space Mono',monospace;font-size:0.62rem;color:var(--accent-cyan);min-width:40px;text-align:right;flex-shrink:0;}
 
-/* ESPN COURT POPUP */
-#courtOverlay{position:fixed;inset:0;z-index:99990;display:flex;align-items:center;justify-content:center;pointer-events:none;opacity:0;transition:opacity 0.35s ease;background:rgba(0,0,0,0.6);backdrop-filter:blur(8px);}
+/* ESPN GAMECAST COURT POPUP */
+#courtOverlay{position:fixed;inset:0;z-index:99990;display:flex;align-items:center;justify-content:center;pointer-events:none;opacity:0;transition:opacity 0.4s ease;background:rgba(0,0,0,0.75);backdrop-filter:blur(10px);}
 #courtOverlay.active{opacity:1;pointer-events:all;}
-.court-popup{position:relative;width:min(92vw,820px);background:rgba(8,10,20,0.98);border:1px solid rgba(255,255,255,0.1);border-radius:22px;box-shadow:0 40px 100px rgba(0,0,0,0.9);overflow:hidden;transform:scale(0.88) translateY(30px);transition:transform 0.4s cubic-bezier(0.25,0.8,0.25,1);}
+.court-popup{position:relative;width:min(96vw,900px);background:#1a1a2e;border:1px solid rgba(255,255,255,0.08);border-radius:18px;box-shadow:0 50px 120px rgba(0,0,0,0.95);overflow:hidden;transform:scale(0.9) translateY(24px);transition:transform 0.4s cubic-bezier(0.25,0.8,0.25,1);}
 #courtOverlay.active .court-popup{transform:scale(1) translateY(0);}
-.court-popup-header{display:flex;align-items:center;justify-content:space-between;padding:12px 18px 10px;border-bottom:1px solid rgba(255,255,255,0.07);}
-.court-popup-teams{display:flex;align-items:center;gap:12px;}
-.court-popup-logo{width:30px;height:30px;object-fit:contain;background:rgba(255,255,255,0.9);border-radius:50%;padding:3px;}
-.court-popup-score{font-family:'Bebas Neue',sans-serif;font-size:1.4rem;letter-spacing:3px;color:#fff;}
-.court-popup-clock{font-family:'Space Mono',monospace;font-size:0.68rem;color:var(--accent-cyan);}
-.court-popup-close{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:#fff;width:28px;height:28px;border-radius:50%;font-size:0.9rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:var(--tr);}
+.court-popup-header{display:flex;align-items:center;justify-content:space-between;padding:10px 16px 8px;background:rgba(0,0,0,0.5);border-bottom:1px solid rgba(255,255,255,0.06);}
+.court-popup-teams{display:flex;align-items:center;gap:10px;}
+.court-popup-logo{width:28px;height:28px;object-fit:contain;background:rgba(255,255,255,0.92);border-radius:50%;padding:2px;}
+.court-popup-score{font-family:'Bebas Neue',sans-serif;font-size:1.35rem;letter-spacing:4px;color:#fff;}
+.court-popup-clock{font-family:'Space Mono',monospace;font-size:0.65rem;color:var(--accent-cyan);}
+.court-popup-close{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:#fff;width:26px;height:26px;border-radius:50%;font-size:0.85rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:var(--tr);}
 .court-popup-close:hover{background:var(--alert-red);}
-#courtCanvas{display:block;width:100%;}
-.score-event-banner{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(to top,rgba(0,0,0,0.97) 55%,transparent);padding:14px 18px 18px;display:none;align-items:center;gap:12px;}
-.seb-player-img{width:50px;height:50px;border-radius:50%;object-fit:cover;object-position:top;border:2px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.08);flex-shrink:0;}
+#courtCanvas{display:block;width:100%;height:auto;}
+.score-event-banner{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(to top,rgba(0,0,0,0.96) 60%,transparent);padding:12px 16px 16px;display:none;align-items:center;gap:12px;}
+.seb-player-img{width:48px;height:48px;border-radius:50%;object-fit:cover;object-position:top;border:2px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.08);flex-shrink:0;}
 .seb-info{flex:1;}
-.seb-player-name{font-family:'Bebas Neue',sans-serif;font-size:1.2rem;letter-spacing:2px;color:#fff;line-height:1;}
-.seb-play-text{font-size:0.72rem;color:rgba(255,255,255,0.55);margin-top:2px;}
-.seb-pts{font-family:'Bebas Neue',sans-serif;font-size:2.5rem;letter-spacing:1px;text-shadow:0 0 16px currentColor;line-height:1;}
+.seb-player-name{font-family:'Bebas Neue',sans-serif;font-size:1.15rem;letter-spacing:2px;color:#fff;line-height:1;}
+.seb-play-text{font-size:0.68rem;color:rgba(255,255,255,0.5);margin-top:2px;}
+.seb-pts{font-family:'Bebas Neue',sans-serif;font-size:2.4rem;letter-spacing:1px;text-shadow:0 0 18px currentColor;line-height:1;}
 .seb-pts.pts2{color:var(--accent-cyan);}.seb-pts.pts3{color:var(--accent-gold);}.seb-pts.pts1{color:var(--accent-green);}
 
 /* SHOOTING OVERLAYS */
@@ -1139,178 +1139,736 @@ function renderLoop(){
 }
 
 // =============================================================================
-// FEATURE 2 — SHOT CHART + COURT POPUP (ESPN-style)
+// ESPN GAMECAST — PERSPECTIVE ARENA COURT + 3D BALL ANIMATION
 // =============================================================================
 let trackedShotChart=[];
 const courtCanvas=document.getElementById('courtCanvas'), cctx=courtCanvas.getContext('2d');
 let courtAnimId=null, courtShots=[];
-let courtW=820, courtH=390;
+let courtW=900, courtH=480;
 
-function triggerCourtAnimation(play,game) {
-  const txt=(play.text||play.description||'').toLowerCase();
-  let pts=2;
-  if(txt.includes('three')||txt.includes('3-pointer')||txt.includes('3 pt')) pts=3;
-  if(txt.includes('free throw')||txt.includes('one point')) pts=1;
-  let distFt=pts===3?24+Math.random()*8:(txt.includes('layup')||txt.includes('dunk')?2+Math.random()*3:8+Math.random()*12);
-  const dm=txt.match(/(\d+)[\s-]?(?:foot|ft)/i);if(dm) distFt=parseInt(dm[1]);
-  let playerName='PLAYER',headshotUrl=null;
-  if(play.athletesInvolved&&play.athletesInvolved[0]){
-    const a=play.athletesInvolved[0];
-    playerName=a.shortName||a.displayName||'PLAYER';
-    headshotUrl=a.headshot?a.headshot.href:buildHeadshot(a.id,game.league);
+// Court coordinate system:
+// The court is drawn in perspective — 3D coords (cx,cy,cz) mapped to screen (sx,sy)
+// cx: 0..1 = left baseline to right baseline
+// cy: 0..1 = near sideline to far sideline  
+// cz: height above floor (0 = floor)
+// We use a simple perspective projection matching the ESPN camera angle
+
+const CAM = {
+  // Vanishing point (where perspective lines meet)
+  vpX: 0.5,   // center horizontally
+  vpY: 0.18,  // high up (arena ceiling perspective)
+  // Court floor corners in screen space (as fraction of canvas)
+  // Near edge (bottom), Far edge (top) — trapezoidal
+  nearY: 0.92,  // bottom of court on screen
+  farY:  0.38,  // top of court on screen
+  nearLeft:  0.02,
+  nearRight: 0.98,
+  farLeft:   0.18,
+  farRight:  0.82,
+};
+
+// Convert 3D court coords to 2D screen pixels
+// cx: 0=left basket, 1=right basket
+// cy: 0=bottom sideline, 1=top sideline
+// cz: 0=floor, positive=up in screen (shrinks with depth)
+function courtToScreen(cx, cy, cz, W, H) {
+  // Bilinear interpolation across the trapezoidal court surface
+  // Near row (cy=0) and far row (cy=1)
+  const nearL = CAM.nearLeft * W, nearR = CAM.nearRight * W, nearY = CAM.nearY * H;
+  const farL  = CAM.farLeft  * W, farR  = CAM.farRight  * W, farY  = CAM.farY  * H;
+  
+  // Interpolate left and right edges at depth cy
+  const leftX  = nearL + (farL  - nearL)  * cy;
+  const rightX = nearR + (farR  - nearR)  * cy;
+  const rowY   = nearY + (farY  - nearY)  * cy;
+  
+  // Interpolate horizontally at cx
+  const sx = leftX + (rightX - leftX) * cx;
+  const sy = rowY;
+  
+  // Height: objects higher up on screen when cz > 0, scaled by depth foreshortening
+  const depthScale = 1 - cy * 0.45; // objects further away appear smaller
+  const screenH = cz * H * 0.35 * depthScale;
+  
+  return { x: sx, y: sy - screenH };
+}
+
+// Get just the floor point (cz=0)
+function floorPt(cx, cy, W, H) { return courtToScreen(cx, cy, 0, W, H); }
+
+function triggerCourtAnimation(play, game) {
+  const txt = (play.text || play.description || '').toLowerCase();
+  let pts = 2;
+  if (txt.includes('three') || txt.includes('3-pointer') || txt.includes('3 pt') || txt.includes('three-point')) pts = 3;
+  if (txt.includes('free throw') || txt.includes('one point')) pts = 1;
+  
+  // Parse distance
+  let distFt = pts===3 ? 24+Math.random()*8 : (txt.includes('layup')||txt.includes('dunk') ? 2+Math.random()*3 : 8+Math.random()*12);
+  const dm = txt.match(/(\d+)[\s-]?(?:foot|ft)/i); if (dm) distFt = parseInt(dm[1]);
+  
+  // Clamp
+  distFt = Math.max(2, Math.min(47, distFt));
+  
+  // Player
+  let playerName = 'PLAYER', headshotUrl = null;
+  if (play.athletesInvolved && play.athletesInvolved[0]) {
+    const a = play.athletesInvolved[0];
+    playerName  = a.shortName || a.displayName || 'PLAYER';
+    headshotUrl = a.headshot ? a.headshot.href : buildHeadshot(a.id, game.league);
   }
-  const attackRight=play.team&&game.home&&play.team.id===game.home.id;
-  openCourtOverlay(game,pts,distFt,playerName,headshotUrl,play.text||play.description||'',attackRight);
+  
+  // Which basket does this team attack?
+  // home team attacks RIGHT basket (cx=1), away attacks LEFT (cx=0)
+  const isHome = play.team && game.home && play.team.id === game.home.id;
+  
+  openCourtOverlay(game, pts, distFt, playerName, headshotUrl, play.text || play.description || '', isHome);
 }
 
-function openCourtOverlay(game,pts,distFt,playerName,headshotUrl,playText,attackRight) {
-  document.getElementById('cpAwayLogo').src=game.away.logo;
-  document.getElementById('cpHomeLogo').src=game.home.logo;
-  document.getElementById('cpAwayScore').innerText=game.away.score;
-  document.getElementById('cpHomeScore').innerText=game.home.score;
-  document.getElementById('cpClock').innerText=game.clock;
-  document.getElementById('sebImg').src=headshotUrl||'https://a.espncdn.com/combiner/i?img=/i/headshots/nophoto.png&w=110&h=80&scale=crop&location=origin&transparent=true';
-  document.getElementById('sebName').innerText=playerName;
-  document.getElementById('sebText').innerText=playText.length>80?playText.substring(0,78)+'…':playText;
-  const ptsEl=document.getElementById('sebPts');ptsEl.innerText='+'+pts;ptsEl.className='seb-pts pts'+pts;
-  document.getElementById('sebBanner').style.display='flex';
-  const overlay=document.getElementById('courtOverlay');overlay.classList.add('active');
-  const rect=courtCanvas.getBoundingClientRect();
-  courtW=courtCanvas.width=Math.round(rect.width||820);courtH=courtCanvas.height=Math.round(rect.height||390);
-  drawCourt(cctx,courtW,courtH,game);
-  // Add to shot chart
-  trackedShotChart.push({pts,distFt,attackRight,playerName,made:true});
-  launchCourtShot(pts,distFt,attackRight,playerName,headshotUrl,game);
+function openCourtOverlay(game, pts, distFt, playerName, headshotUrl, playText, shooterIsHome) {
+  // Header
+  document.getElementById('cpAwayLogo').src    = game.away.logo;
+  document.getElementById('cpHomeLogo').src    = game.home.logo;
+  document.getElementById('cpAwayScore').innerText = game.away.score;
+  document.getElementById('cpHomeScore').innerText = game.home.score;
+  document.getElementById('cpClock').innerText = game.clock;
+  
+  // Banner
+  document.getElementById('sebImg').src  = headshotUrl || 'https://a.espncdn.com/combiner/i?img=/i/headshots/nophoto.png&w=110&h=80&scale=crop&location=origin&transparent=true';
+  document.getElementById('sebName').innerText = playerName;
+  document.getElementById('sebText').innerText = playText.length > 80 ? playText.substring(0,78)+'…' : playText;
+  const ptsEl = document.getElementById('sebPts');
+  ptsEl.innerText = '+' + pts;
+  ptsEl.className = 'seb-pts pts' + pts;
+  document.getElementById('sebBanner').style.display = 'flex';
+  
+  // Show overlay
+  const overlay = document.getElementById('courtOverlay');
+  overlay.classList.add('active');
+  
+  // Size canvas
+  const rect = courtCanvas.getBoundingClientRect();
+  courtW = courtCanvas.width  = Math.round(rect.width  || 900);
+  courtH = courtCanvas.height = Math.round(rect.height || 480);
+  
+  // Add to shot chart history
+  trackedShotChart.push({ pts, distFt, shooterIsHome, made: true });
+  
+  // Draw static court first
+  drawArena(cctx, courtW, courtH, game);
+  
+  // Launch ball animation
+  launchPerspectiveBall(pts, distFt, shooterIsHome, playerName, headshotUrl, game);
+  
+  // Auto-close
   clearTimeout(window._courtAutoClose);
-  window._courtAutoClose=setTimeout(()=>{overlay.classList.remove('active');},9000);
-}
-function closeCourtOverlay(e){
-  if(!e||e.target.id==='courtOverlay'){document.getElementById('courtOverlay').classList.remove('active');clearTimeout(window._courtAutoClose);}
+  window._courtAutoClose = setTimeout(() => overlay.classList.remove('active'), 10000);
 }
 
-function drawCourt(ctx,W,H,game) {
-  ctx.fillStyle='#d4a96a';ctx.fillRect(0,0,W,H);
-  ctx.strokeStyle='#c49558';ctx.lineWidth=1;
-  for(let y=0;y<H;y+=7){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
-  const mx=W*0.04,my=H*0.06,cW=W*0.92,cH=H*0.88;
-  ctx.strokeStyle='#fff';ctx.lineWidth=2.5;ctx.strokeRect(mx,my,cW,cH);
-  ctx.beginPath();ctx.moveTo(W/2,my);ctx.lineTo(W/2,my+cH);ctx.stroke();
-  ctx.beginPath();ctx.arc(W/2,H/2,H*0.11,0,Math.PI*2);ctx.stroke();
-  ctx.beginPath();ctx.arc(W/2,H/2,H*0.025,0,Math.PI*2);ctx.stroke();
-  const pW=cW*0.16,pH=cH*0.36,pY=my+(cH-pH)/2;
-  // LEFT paint
-  ctx.fillStyle='rgba(180,80,40,0.18)';ctx.fillRect(mx,pY,pW,pH);ctx.strokeStyle='#fff';ctx.lineWidth=2;ctx.strokeRect(mx,pY,pW,pH);
-  ctx.beginPath();ctx.arc(mx+pW,H/2,pH/2,-Math.PI/2,Math.PI/2,false);ctx.stroke();
-  ctx.beginPath();ctx.arc(mx+pW*0.28,H/2,cH*0.44,-Math.PI*0.48,Math.PI*0.48,false);ctx.stroke();
-  ctx.beginPath();ctx.moveTo(mx,my+cH*0.085);ctx.lineTo(mx+cW*0.138,my+cH*0.085);ctx.stroke();
-  ctx.beginPath();ctx.moveTo(mx,my+cH*0.915);ctx.lineTo(mx+cW*0.138,my+cH*0.915);ctx.stroke();
-  drawBasketSide(ctx,mx+pW*0.1,H/2,'left');
-  // RIGHT paint
-  const rpX=mx+cW-pW;
-  ctx.fillStyle='rgba(180,80,40,0.18)';ctx.fillRect(rpX,pY,pW,pH);ctx.strokeRect(rpX,pY,pW,pH);
-  ctx.beginPath();ctx.arc(rpX,H/2,pH/2,-Math.PI/2,Math.PI/2,true);ctx.stroke();
-  ctx.beginPath();ctx.arc(rpX+pW*0.72,H/2,cH*0.44,Math.PI*0.52,Math.PI*1.48,true);ctx.stroke();
-  ctx.beginPath();ctx.moveTo(mx+cW,my+cH*0.085);ctx.lineTo(mx+cW-cW*0.138,my+cH*0.085);ctx.stroke();
-  ctx.beginPath();ctx.moveTo(mx+cW,my+cH*0.915);ctx.lineTo(mx+cW-cW*0.138,my+cH*0.915);ctx.stroke();
-  drawBasketSide(ctx,rpX+pW*0.9,H/2,'right');
-  // Shot chart dots from history
-  drawShotChart(ctx,W,H,game);
-}
-function drawBasketSide(ctx,x,y,side){
-  ctx.strokeStyle='#999';ctx.lineWidth=4;
-  if(side==='left'){ctx.beginPath();ctx.moveTo(x-6,y-22);ctx.lineTo(x-6,y+22);ctx.stroke();}
-  else{ctx.beginPath();ctx.moveTo(x+6,y-22);ctx.lineTo(x+6,y+22);ctx.stroke();}
-  ctx.strokeStyle='#e05000';ctx.lineWidth=3;
-  const bx=side==='left'?x+14:x-14;
-  ctx.beginPath();ctx.arc(bx,y,13,0,Math.PI*2);ctx.stroke();
-  ctx.strokeStyle='rgba(255,255,255,0.35)';ctx.lineWidth=1;
-  for(let i=-3;i<=3;i++){ctx.beginPath();ctx.moveTo(bx+i*3,y+13);ctx.lineTo(bx+i*2.5,y+25);ctx.stroke();}
-  ctx.beginPath();ctx.moveTo(bx-13,y+25);ctx.lineTo(bx+13,y+25);ctx.stroke();
+function closeCourtOverlay(e) {
+  if (!e || e.target.id === 'courtOverlay') {
+    document.getElementById('courtOverlay').classList.remove('active');
+    clearTimeout(window._courtAutoClose);
+    if (courtAnimId) { cancelAnimationFrame(courtAnimId); courtAnimId = null; }
+  }
 }
 
-// FEATURE 2 — SHOT CHART overlay on court
-function drawShotChart(ctx,W,H,game) {
-  if(!game) return;
-  const mx=W*0.04,my=H*0.06,cW=W*0.92,cH=H*0.88;
-  const pW=cW*0.16;
-  trackedShotChart.slice(-30).forEach(shot=>{
-    const bx=shot.attackRight?mx+cW-pW*0.1:mx+pW*0.1, by=H/2;
-    const maxCourtFt=47,courtPxLen=cW*0.5;
-    const distPx=Math.min(shot.distFt/maxCourtFt,1)*courtPxLen*0.88;
-    const angle=shot.attackRight?(Math.random()*Math.PI+Math.PI):Math.random()*Math.PI;
-    const dotX=Math.max(mx+8,Math.min(mx+cW-8,bx+Math.cos(angle)*distPx));
-    const dotY=Math.max(my+8,Math.min(my+cH-8,by+Math.sin(angle)*distPx*0.55));
-    ctx.save();ctx.globalAlpha=0.7;
-    ctx.fillStyle=shot.pts===3?(shot.made?'#ffd700':'rgba(255,215,0,0.3)'):(shot.made?'#00f3ff':'rgba(0,243,255,0.3)');
-    ctx.beginPath();ctx.arc(dotX,dotY,shot.pts===3?5:4,0,Math.PI*2);ctx.fill();
-    if(!shot.made){ctx.strokeStyle='#ff3333';ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(dotX-4,dotY-4);ctx.lineTo(dotX+4,dotY+4);ctx.stroke();ctx.beginPath();ctx.moveTo(dotX+4,dotY-4);ctx.lineTo(dotX-4,dotY+4);ctx.stroke();}
+// =============================================================================
+// DRAW ESPN-STYLE PERSPECTIVE ARENA
+// =============================================================================
+function drawArena(ctx, W, H, game) {
+  // ---- BACKGROUND: Arena interior ----
+  // Ceiling/upper arena — dark grey curved section
+  const arenaGrad = ctx.createLinearGradient(0, 0, 0, H * 0.35);
+  arenaGrad.addColorStop(0, '#2a2a2a');
+  arenaGrad.addColorStop(0.6, '#3a3a3a');
+  arenaGrad.addColorStop(1, '#4a4a4a');
+  ctx.fillStyle = arenaGrad;
+  ctx.fillRect(0, 0, W, H * 0.38);
+  
+  // Curved arena "bowl" seating silhouette
+  ctx.save();
+  ctx.fillStyle = '#232323';
+  ctx.beginPath();
+  ctx.moveTo(0, 0);
+  ctx.lineTo(W, 0);
+  ctx.lineTo(W, H * 0.32);
+  // Curved bottom of seating bowl
+  ctx.quadraticCurveTo(W * 0.75, H * 0.38, W * 0.5, H * 0.35);
+  ctx.quadraticCurveTo(W * 0.25, H * 0.32, 0, H * 0.32);
+  ctx.closePath();
+  ctx.fill();
+  ctx.restore();
+  
+  // Jumbotron / scoreboard hint at top center
+  ctx.save();
+  ctx.fillStyle = 'rgba(0,0,0,0.6)';
+  ctx.beginPath();
+  ctx.roundRect(W*0.38, H*0.01, W*0.24, H*0.08, 4);
+  ctx.fill();
+  ctx.fillStyle = 'rgba(255,255,255,0.08)';
+  ctx.fillRect(W*0.385, H*0.015, W*0.23, H*0.07);
+  // Score display on jumbotron
+  ctx.font = `bold ${Math.round(H*0.028)}px 'Bebas Neue', sans-serif`;
+  ctx.fillStyle = '#fff';
+  ctx.textAlign = 'center';
+  if (game) {
+    ctx.fillText(`${game.away.name}  ${game.away.score} – ${game.home.score}  ${game.home.name}`, W*0.5, H*0.065);
+  }
+  ctx.restore();
+  
+  // Dotted crowd/seat pattern
+  ctx.save();
+  ctx.globalAlpha = 0.18;
+  for (let row = 0; row < 6; row++) {
+    const y0 = H * (0.1 + row * 0.032);
+    const rowW = W * (0.9 - row * 0.04);
+    const rowX = W * (0.05 + row * 0.02);
+    for (let i = 0; i < 60 - row*5; i++) {
+      const x = rowX + (rowW / (60 - row*5)) * i + Math.random()*4;
+      const r = 3 + Math.random()*3;
+      ctx.fillStyle = ['#555','#666','#444','#777'][Math.floor(Math.random()*4)];
+      ctx.beginPath(); ctx.arc(x, y0, r, 0, Math.PI*2); ctx.fill();
+    }
+  }
+  ctx.restore();
+  
+  // Side walls / arena walls connecting ceiling to court
+  // Left wall
+  ctx.save();
+  const wallGrad = ctx.createLinearGradient(0, H*0.3, W*0.15, H*0.92);
+  wallGrad.addColorStop(0, '#3a3a3a');
+  wallGrad.addColorStop(1, '#555');
+  ctx.fillStyle = wallGrad;
+  ctx.beginPath();
+  ctx.moveTo(0, H*0.3);
+  ctx.lineTo(W*0.02, CAM.nearY * H);
+  ctx.lineTo(W*CAM.farLeft, CAM.farY * H);
+  ctx.lineTo(0, H*0.28);
+  ctx.closePath();
+  ctx.fill();
+  // Right wall
+  ctx.beginPath();
+  ctx.moveTo(W, H*0.3);
+  ctx.lineTo(W*0.98, CAM.nearY * H);
+  ctx.lineTo(W*CAM.farRight, CAM.farY * H);
+  ctx.lineTo(W, H*0.28);
+  ctx.closePath();
+  ctx.fill();
+  ctx.restore();
+  
+  // ---- COURT FLOOR ----
+  drawPerspectiveCourt(ctx, W, H, game);
+  
+  // ---- BASKETS ----
+  drawPerspectiveBasket(ctx, W, H, 'left');
+  drawPerspectiveBasket(ctx, W, H, 'right');
+  
+  // ---- SHOT CHART HISTORY ----
+  drawPerspectiveShotChart(ctx, W, H);
+}
+
+function drawPerspectiveCourt(ctx, W, H, game) {
+  const nearL = CAM.nearLeft  * W, nearR = CAM.nearRight * W, nearY = CAM.nearY * H;
+  const farL  = CAM.farLeft   * W, farR  = CAM.farRight  * W, farY  = CAM.farY  * H;
+  
+  // Main floor — wood color with perspective gradient
+  const floorGrad = ctx.createLinearGradient(W/2, farY, W/2, nearY);
+  floorGrad.addColorStop(0, '#b8883a');
+  floorGrad.addColorStop(0.4, '#c99a4a');
+  floorGrad.addColorStop(0.7, '#d4a962');
+  floorGrad.addColorStop(1, '#c08535');
+  ctx.fillStyle = floorGrad;
+  ctx.beginPath();
+  ctx.moveTo(nearL, nearY);
+  ctx.lineTo(nearR, nearY);
+  ctx.lineTo(farR,  farY);
+  ctx.lineTo(farL,  farY);
+  ctx.closePath();
+  ctx.fill();
+  
+  // Wood grain lines (horizontal perspective lines)
+  ctx.save();
+  ctx.globalAlpha = 0.12;
+  ctx.strokeStyle = '#7a5520';
+  ctx.lineWidth = 1;
+  const grainSteps = 18;
+  for (let i = 0; i <= grainSteps; i++) {
+    const t = i / grainSteps;
+    const lx = nearL + (farL - nearL) * t;
+    const rx = nearR + (farR - nearR) * t;
+    const y  = nearY + (farY  - nearY) * t;
+    ctx.beginPath(); ctx.moveTo(lx, y); ctx.lineTo(rx, y); ctx.stroke();
+  }
+  ctx.restore();
+  
+  // Court boundary lines
+  ctx.strokeStyle = 'rgba(255,255,255,0.9)';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(nearL, nearY); ctx.lineTo(nearR, nearY);
+  ctx.lineTo(farR,  farY);  ctx.lineTo(farL,  farY);
+  ctx.closePath(); ctx.stroke();
+  
+  // Half-court line
+  const hmNear = floorPt(0.5, 0, W, H), hmFar = floorPt(0.5, 1, W, H);
+  ctx.beginPath(); ctx.moveTo(hmNear.x, hmNear.y); ctx.lineTo(hmFar.x, hmFar.y); ctx.stroke();
+  
+  // Center circle (ellipse in perspective)
+  drawPerspectiveCircle(ctx, W, H, 0.5, 0.5, 0.09, 'rgba(255,255,255,0.8)', 2);
+  
+  // LEFT paint (key)
+  drawPaint(ctx, W, H, 'left');
+  
+  // RIGHT paint (key)
+  drawPaint(ctx, W, H, 'right');
+  
+  // 3-point arcs
+  drawThreeArc(ctx, W, H, 'left');
+  drawThreeArc(ctx, W, H, 'right');
+  
+  // Center logo hint
+  if (game) {
+    const cPt = floorPt(0.5, 0.5, W, H);
+    ctx.save();
+    ctx.globalAlpha = 0.15;
+    ctx.font = `bold ${Math.round(H * 0.12)}px 'Bebas Neue', sans-serif`;
+    ctx.fillStyle = '#fff';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText((game.home.name || '').substring(0,3).toUpperCase(), cPt.x, cPt.y);
+    ctx.restore();
+  }
+}
+
+function drawPerspectiveCircle(ctx, W, H, cx, cy, radius, color, lineWidth) {
+  // Sample points around circle and project them
+  ctx.strokeStyle = color;
+  ctx.lineWidth = lineWidth;
+  ctx.beginPath();
+  const steps = 48;
+  for (let i = 0; i <= steps; i++) {
+    const angle = (i / steps) * Math.PI * 2;
+    const px = cx + Math.cos(angle) * radius;
+    const py = cy + Math.sin(angle) * radius * 0.38; // squished vertically for perspective
+    const pt = floorPt(px, py, W, H);
+    i === 0 ? ctx.moveTo(pt.x, pt.y) : ctx.lineTo(pt.x, pt.y);
+  }
+  ctx.stroke();
+}
+
+function drawPaint(ctx, W, H, side) {
+  // Paint box dimensions in court coords
+  const isLeft = side === 'left';
+  const x0 = isLeft ? 0 : 1;
+  const x1 = isLeft ? 0.14 : 0.86;
+  const y0 = 0.32, y1 = 0.68;
+  
+  const corners = [
+    floorPt(x0, y0, W, H), floorPt(x1, y0, W, H),
+    floorPt(x1, y1, W, H), floorPt(x0, y1, W, H)
+  ];
+  
+  // Fill
+  ctx.fillStyle = 'rgba(160,70,30,0.22)';
+  ctx.beginPath();
+  corners.forEach((pt, i) => i === 0 ? ctx.moveTo(pt.x, pt.y) : ctx.lineTo(pt.x, pt.y));
+  ctx.closePath(); ctx.fill();
+  
+  // Stroke
+  ctx.strokeStyle = 'rgba(255,255,255,0.85)';
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  corners.forEach((pt, i) => i === 0 ? ctx.moveTo(pt.x, pt.y) : ctx.lineTo(pt.x, pt.y));
+  ctx.closePath(); ctx.stroke();
+  
+  // Free throw circle (at end of paint)
+  const ftX = isLeft ? 0.14 : 0.86;
+  drawPerspectiveCircle(ctx, W, H, ftX, 0.5, 0.16, 'rgba(255,255,255,0.7)', 1.5);
+}
+
+function drawThreeArc(ctx, W, H, side) {
+  const isLeft = side === 'left';
+  const basketCX = isLeft ? 0.04 : 0.96;
+  const arcRadius = 0.36; // in court-x units
+  
+  ctx.strokeStyle = 'rgba(255,255,255,0.8)';
+  ctx.lineWidth = 1.5;
+  
+  // Corner lines
+  const c1 = floorPt(isLeft ? 0 : 1, 0.12, W, H);
+  const c2 = floorPt(isLeft ? 0.12 : 0.88, 0.12, W, H);
+  const c3 = floorPt(isLeft ? 0 : 1, 0.88, W, H);
+  const c4 = floorPt(isLeft ? 0.12 : 0.88, 0.88, W, H);
+  
+  ctx.beginPath(); ctx.moveTo(c1.x, c1.y); ctx.lineTo(c2.x, c2.y); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(c3.x, c3.y); ctx.lineTo(c4.x, c4.y); ctx.stroke();
+  
+  // Arc — sample points
+  ctx.beginPath();
+  let started = false;
+  const steps = 36;
+  const startAngle = isLeft ? -Math.PI*0.46 : Math.PI*0.54;
+  const endAngle   = isLeft ?  Math.PI*0.46 : Math.PI*1.46;
+  
+  for (let i = 0; i <= steps; i++) {
+    const angle = startAngle + (endAngle - startAngle) * (i / steps);
+    const px = basketCX + Math.cos(angle) * arcRadius;
+    const py = 0.5 + Math.sin(angle) * arcRadius * 0.75;
+    if (px < 0 || px > 1 || py < 0 || py > 1) continue;
+    const pt = floorPt(px, py, W, H);
+    if (!started) { ctx.moveTo(pt.x, pt.y); started = true; }
+    else ctx.lineTo(pt.x, pt.y);
+  }
+  ctx.stroke();
+}
+
+function drawPerspectiveBasket(ctx, W, H, side) {
+  const isLeft = side === 'left';
+  // Basket position in court coords
+  const bCX = isLeft ? 0.035 : 0.965;
+  const bCY = 0.5;
+  const basketPt = courtToScreen(bCX, bCY, 0.28, W, H); // rim height ~3.5ft equivalent
+  const floorBasket = floorPt(bCX, bCY, W, H);
+  
+  // Backboard — vertical rectangle behind basket
+  const bbH = H * 0.06;
+  const bbW = W * 0.022;
+  const bbX = isLeft ? floorPt(0, bCY, W, H).x - bbW*0.3 : floorPt(1, bCY, W, H).x - bbW*0.7;
+  const bbYBase = courtToScreen(isLeft ? 0.005 : 0.995, bCY, 0.45, W, H).y;
+  
+  // Backboard fill
+  ctx.fillStyle = 'rgba(220,225,230,0.9)';
+  ctx.fillRect(bbX, bbYBase - bbH, bbW, bbH);
+  ctx.strokeStyle = '#999';
+  ctx.lineWidth = 1.5;
+  ctx.strokeRect(bbX, bbYBase - bbH, bbW, bbH);
+  
+  // Backboard inner box (small rectangle)
+  ctx.strokeStyle = 'rgba(255,100,0,0.7)';
+  ctx.lineWidth = 1;
+  ctx.strokeRect(bbX + bbW*0.2, bbYBase - bbH*0.55, bbW*0.6, bbH*0.4);
+  
+  // Support pole
+  ctx.strokeStyle = '#1a1a5e';
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.moveTo(isLeft ? bbX - 8 : bbX + bbW + 8, bbYBase);
+  ctx.lineTo(isLeft ? bbX - 8 : bbX + bbW + 8, bbYBase - bbH * 0.5);
+  ctx.stroke();
+  // Horizontal support arm
+  ctx.beginPath();
+  ctx.moveTo(isLeft ? bbX - 8 : bbX + bbW + 8, bbYBase - bbH * 0.3);
+  ctx.lineTo(isLeft ? bbX + bbW*0.5 : bbX + bbW*0.5, bbYBase - bbH * 0.5);
+  ctx.stroke();
+  
+  // RIM — ellipse
+  const rimCenterX = isLeft ? bbX + bbW*0.5 + W*0.022 : bbX + bbW*0.5 - W*0.022;
+  const rimCenterY = bbYBase - bbH * 0.25;
+  const rimRX = W * 0.018;
+  const rimRY = rimRX * 0.38;
+  
+  ctx.strokeStyle = '#e05000';
+  ctx.lineWidth = 2.5;
+  ctx.beginPath();
+  ctx.ellipse(rimCenterX, rimCenterY, rimRX, rimRY, 0, 0, Math.PI * 2);
+  ctx.stroke();
+  
+  // Net (simplified — vertical lines hanging down)
+  ctx.strokeStyle = 'rgba(240,240,240,0.55)';
+  ctx.lineWidth = 0.8;
+  const netDropY = rimCenterY + rimRY * 14;
+  for (let i = -3; i <= 3; i++) {
+    const nx = rimCenterX + i * rimRX * 0.32;
+    ctx.beginPath();
+    ctx.moveTo(nx, rimCenterY + rimRY);
+    ctx.lineTo(rimCenterX + i * rimRX * 0.22, netDropY);
+    ctx.stroke();
+  }
+  // Net bottom
+  ctx.beginPath();
+  ctx.moveTo(rimCenterX - rimRX*0.95, netDropY);
+  ctx.lineTo(rimCenterX + rimRX*0.95, netDropY);
+  ctx.stroke();
+  
+  // Store basket screen coords for animation use
+  if (side === 'left') {
+    window._basketLeft  = { x: rimCenterX, y: rimCenterY, rx: rimRX, ry: rimRY, netY: netDropY };
+  } else {
+    window._basketRight = { x: rimCenterX, y: rimCenterY, rx: rimRX, ry: rimRY, netY: netDropY };
+  }
+}
+
+function drawPerspectiveShotChart(ctx, W, H) {
+  trackedShotChart.slice(-40).forEach(shot => {
+    // Use stored coords (stable per shot)
+    if (!shot._sx) {
+      const isLeft = !shot.shooterIsHome;
+      const bCX = isLeft ? 0.035 : 0.965;
+      const maxCourtFt = 47;
+      const distNorm = Math.min(shot.distFt / maxCourtFt, 1);
+      const angle = isLeft ? (Math.random() * Math.PI) : (Math.random() * Math.PI + Math.PI);
+      const shotCX = Math.max(0.03, Math.min(0.97, bCX + Math.cos(angle) * distNorm * 0.45));
+      const shotCY = Math.max(0.05, Math.min(0.95, 0.5  + Math.sin(angle) * distNorm * 0.38));
+      shot._sx = shotCX; shot._sy = shotCY;
+    }
+    const pt = floorPt(shot._sx, shot._sy, W, H);
+    ctx.save();
+    ctx.globalAlpha = 0.75;
+    ctx.fillStyle = shot.pts === 3 ? '#ffd700' : '#00f3ff';
+    ctx.beginPath(); ctx.arc(pt.x, pt.y, shot.pts === 3 ? 5 : 4, 0, Math.PI * 2); ctx.fill();
     ctx.restore();
   });
 }
 
-function launchCourtShot(pts,distFt,attackRight,playerName,headshotUrl,game) {
-  if(courtAnimId){cancelAnimationFrame(courtAnimId);courtAnimId=null;}
-  courtShots=[];
-  const mx=courtW*0.04,my=courtH*0.06,cW=courtW*0.92,cH=courtH*0.88,pW=cW*0.16;
-  const bx=attackRight?mx+cW-pW*0.1:mx+pW*0.1,by=courtH/2;
-  const maxCourtFt=47,courtPxLen=cW*0.5;
-  const distPx=Math.min(distFt/maxCourtFt,1)*courtPxLen*0.88;
-  const angle=attackRight?(Math.random()*Math.PI+Math.PI):Math.random()*Math.PI;
-  const ox=Math.max(mx+15,Math.min(mx+cW-15,bx+Math.cos(angle)*distPx));
-  const oy=Math.max(my+15,Math.min(my+cH-15,by+Math.sin(angle)*distPx*0.55));
-  const shot={sx:ox,sy:oy,tx:bx,ty:by,cpX:(ox+bx)/2,cpY:Math.min(oy,by)-courtH*0.28,t:0,speed:0.024,pts,distFt,playerName,headshotUrl,rot:0,trail:[],active:true,game};
-  courtShots.push(shot);
-  // Draw static origin dot + path preview
-  drawCourt(cctx,courtW,courtH,game);
-  drawCourtShotPath(cctx,ox,oy,bx,by,pts);
-  cctx.save();
-  cctx.fillStyle=pts===3?'rgba(255,215,0,0.8)':'rgba(0,243,255,0.8)';
-  cctx.beginPath();cctx.arc(ox,oy,9,0,Math.PI*2);cctx.fill();
-  cctx.strokeStyle='#fff';cctx.lineWidth=1.5;cctx.beginPath();cctx.arc(ox,oy,9,0,Math.PI*2);cctx.stroke();
-  cctx.font="bold 12px 'Space Mono',monospace";cctx.fillStyle=pts===3?'#ffd700':'#00f3ff';cctx.textAlign='center';
-  cctx.fillText(Math.round(distFt)+' FT',ox,oy-16);cctx.fillText(playerName,ox,oy-29);
-  cctx.restore();
-  courtRenderLoop();
-}
-function drawCourtShotPath(ctx,sx,sy,tx,ty,pts){
-  const cpX=(sx+tx)/2,cpY=Math.min(sy,ty)-courtH*0.28;
-  ctx.save();ctx.setLineDash([4,6]);ctx.strokeStyle=pts===3?'rgba(255,215,0,0.35)':'rgba(0,243,255,0.3)';ctx.lineWidth=1.5;
-  ctx.beginPath();
-  for(let i=0;i<=40;i++){const t=i/40,x=(1-t)*(1-t)*sx+2*(1-t)*t*cpX+t*t*tx,y=(1-t)*(1-t)*sy+2*(1-t)*t*cpY+t*t*ty;i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);}
-  ctx.stroke();ctx.setLineDash([]);ctx.restore();
-}
-function courtRenderLoop(){
-  let any=false;
-  for(let i=courtShots.length-1;i>=0;i--){
-    const s=courtShots[i];if(!s.active){courtShots.splice(i,1);continue;}
-    s.t=Math.min(s.t+s.speed,1);const t=s.t;
-    const x=(1-t)*(1-t)*s.sx+2*(1-t)*t*s.cpX+t*t*s.tx;
-    const y=(1-t)*(1-t)*s.sy+2*(1-t)*t*s.cpY+t*t*s.ty;
-    s.trail.push({x,y});if(s.trail.length>12)s.trail.shift();
-    drawCourt(cctx,courtW,courtH,s.game);
-    drawCourtShotPath(cctx,s.sx,s.sy,s.tx,s.ty,s.pts);
-    cctx.save();cctx.fillStyle=s.pts===3?'rgba(255,215,0,0.7)':'rgba(0,243,255,0.65)';cctx.beginPath();cctx.arc(s.sx,s.sy,8,0,Math.PI*2);cctx.fill();cctx.restore();
-    s.trail.forEach((pt,idx)=>{const a=(idx/s.trail.length)*0.55;cctx.save();cctx.globalAlpha=a;cctx.fillStyle=s.pts===3?'#ffd700':'#ff8800';cctx.beginPath();cctx.arc(pt.x,pt.y,(idx/s.trail.length)*7+2,0,Math.PI*2);cctx.fill();cctx.restore();});
-    s.rot+=0.14;const br=12;
-    cctx.save();cctx.translate(x,y);cctx.rotate(s.rot);
-    const g2=cctx.createRadialGradient(-3,-3,2,0,0,br);g2.addColorStop(0,'#ff9a3c');g2.addColorStop(0.6,'#cc5500');g2.addColorStop(1,'#7a2200');
-    cctx.fillStyle=g2;cctx.beginPath();cctx.arc(0,0,br,0,Math.PI*2);cctx.fill();
-    cctx.strokeStyle='rgba(0,0,0,0.5)';cctx.lineWidth=1.5;cctx.beginPath();cctx.moveTo(-br,0);cctx.lineTo(br,0);cctx.stroke();
-    cctx.beginPath();cctx.arc(0,0,br*0.7,0.15,Math.PI-0.15);cctx.stroke();cctx.beginPath();cctx.arc(0,0,br*0.7,Math.PI+0.15,Math.PI*2-0.15);cctx.stroke();
-    cctx.shadowColor='#ff7700';cctx.shadowBlur=14;cctx.strokeStyle='rgba(255,120,0,0.45)';cctx.lineWidth=2;cctx.beginPath();cctx.arc(0,0,br,0,Math.PI*2);cctx.stroke();cctx.restore();
-    cctx.save();cctx.font="bold 10px 'Rajdhani',sans-serif";cctx.fillStyle='rgba(255,255,255,0.85)';cctx.textAlign='center';cctx.fillText(s.playerName,x,y-18);cctx.restore();
-    if(s.t>=1){
-      cctx.save();const gr=cctx.createRadialGradient(s.tx,s.ty,0,s.tx,s.ty,38);
-      gr.addColorStop(0,s.pts===3?'rgba(255,215,0,0.9)':'rgba(0,243,255,0.85)');gr.addColorStop(1,'transparent');
-      cctx.fillStyle=gr;cctx.beginPath();cctx.arc(s.tx,s.ty,38,0,Math.PI*2);cctx.fill();
-      cctx.font="bold 20px 'Bebas Neue',sans-serif";cctx.fillStyle=s.pts===3?'#ffd700':'#00f3ff';cctx.textAlign='center';
-      cctx.fillText(s.pts===3?'THREE!':'BUCKET!',s.tx,s.ty-44);cctx.restore();
-      s.active=false;
-    }
-    any=true;
+// =============================================================================
+// LAUNCH BALL ANIMATION — PERSPECTIVE ARC
+// =============================================================================
+function launchPerspectiveBall(pts, distFt, shooterIsHome, playerName, headshotUrl, game) {
+  if (courtAnimId) { cancelAnimationFrame(courtAnimId); courtAnimId = null; }
+  courtShots = [];
+  
+  // Determine shot origin in court coords
+  // shooterIsHome → attacks RIGHT basket (cx≈1)
+  // !shooterIsHome → attacks LEFT basket (cx≈0)
+  const isLeft = !shooterIsHome; // shooter attacks left = shooter is away team
+  const bCX = isLeft ? 0.035 : 0.965; // basket cx
+  const bCY = 0.5;
+  
+  // Shot origin — distance from basket, random angle within valid half
+  const maxCourtFt = 47;
+  const distNorm = Math.min(distFt / maxCourtFt, 1);
+  
+  // For free throws, place at foul line
+  let shotCX, shotCY;
+  const txt_lower = playerName; // we just use distFt
+  if (distFt <= 2.5) {
+    // Layup — very close to basket
+    shotCX = isLeft ? bCX + 0.06 : bCX - 0.06;
+    shotCY = 0.5 + (Math.random() - 0.5) * 0.08;
+  } else if (distFt >= 15 && distFt <= 16) {
+    // Likely foul shot — place at foul line
+    shotCX = isLeft ? 0.14 : 0.86;
+    shotCY = 0.5;
+  } else {
+    // Normal shot — random angle facing basket
+    const angleRange = isLeft ? [0, Math.PI] : [Math.PI, Math.PI * 2];
+    const angle = angleRange[0] + Math.random() * (angleRange[1] - angleRange[0]);
+    shotCX = Math.max(0.03, Math.min(0.97, bCX + Math.cos(angle) * distNorm * 0.46));
+    shotCY = Math.max(0.05, Math.min(0.95, 0.5  + Math.sin(angle) * distNorm * 0.38));
   }
-  if(any){courtAnimId=requestAnimationFrame(courtRenderLoop);}else{courtAnimId=null;}
+  
+  // Store for shot chart
+  const lastShot = trackedShotChart[trackedShotChart.length - 1];
+  if (lastShot && !lastShot._sx) {
+    lastShot._sx = shotCX; lastShot._sy = shotCY;
+  }
+  
+  // Redraw arena fresh  
+  drawArena(cctx, courtW, courtH, game);
+  
+  // Get basket screen position
+  const basket = isLeft ? window._basketLeft : window._basketRight;
+  if (!basket) { courtRenderLoop_fallback(pts, playerName, game); return; }
+  
+  // Shot origin screen position (on floor)
+  const originFloor = floorPt(shotCX, shotCY, courtW, courtH);
+  
+  // Draw origin indicator
+  cctx.save();
+  const dotColor = pts === 3 ? '#ffd700' : '#00f3ff';
+  const dotGlow = cctx.createRadialGradient(originFloor.x, originFloor.y, 0, originFloor.x, originFloor.y, 18);
+  dotGlow.addColorStop(0, pts===3 ? 'rgba(255,215,0,0.9)' : 'rgba(0,243,255,0.9)');
+  dotGlow.addColorStop(1, 'transparent');
+  cctx.fillStyle = dotGlow;
+  cctx.beginPath(); cctx.arc(originFloor.x, originFloor.y, 18, 0, Math.PI*2); cctx.fill();
+  // Solid center dot
+  cctx.fillStyle = dotColor;
+  cctx.beginPath(); cctx.arc(originFloor.x, originFloor.y, 6, 0, Math.PI*2); cctx.fill();
+  cctx.strokeStyle = '#fff'; cctx.lineWidth = 1.5;
+  cctx.beginPath(); cctx.arc(originFloor.x, originFloor.y, 6, 0, Math.PI*2); cctx.stroke();
+  // Distance label
+  cctx.font = "bold 11px 'Space Mono', monospace";
+  cctx.fillStyle = dotColor;
+  cctx.textAlign = 'center';
+  cctx.fillText(Math.round(distFt) + ' FT', originFloor.x, originFloor.y - 14);
+  cctx.fillStyle = 'rgba(255,255,255,0.9)';
+  cctx.fillText(playerName, originFloor.x, originFloor.y - 26);
+  cctx.restore();
+  
+  // The ball arc:
+  // Goes from origin screen pos, arcs UP (in screen Y = downward in 3D), then descends to basket
+  // The arc height is determined by shot distance and simulates a realistic shot arc
+  const arcHeight = 80 + distNorm * 120; // pixels of max height in screen
+  
+  // Bezier control point — above midpoint, accounts for perspective (closer = lower on screen = higher Y value)
+  const midX = (originFloor.x + basket.x) / 2;
+  const midY = Math.min(originFloor.y, basket.y) - arcHeight;
+  
+  courtShots.push({
+    // Start position (ball on floor at shot origin)
+    sx: originFloor.x, sy: originFloor.y,
+    // End position (basket rim center)
+    tx: basket.x, ty: basket.y,
+    // Bezier control
+    cpX: midX, cpY: midY,
+    // Basket info for rim bounce
+    basket,
+    // Animation state
+    t: 0, speed: 0.018 + distNorm * 0.006,
+    pts, distFt, playerName,
+    rot: 0, trail: [],
+    active: true, scored: false,
+    phase: 'fly', // fly → scored
+    game,
+    // Ball radius changes with depth (perspective size)
+    originCY: shotCY, targetCY: bCY,
+  });
+  
+  courtRenderLoopPerspective();
 }
+
+function courtRenderLoopPerspective() {
+  let any = false;
+  
+  for (let i = courtShots.length - 1; i >= 0; i--) {
+    const s = courtShots[i];
+    if (!s.active) { courtShots.splice(i, 1); continue; }
+    
+    s.t = Math.min(s.t + s.speed, 1);
+    const t = s.t;
+    
+    // Quadratic bezier position
+    const bx = (1-t)*(1-t)*s.sx + 2*(1-t)*t*s.cpX + t*t*s.tx;
+    const by = (1-t)*(1-t)*s.sy + 2*(1-t)*t*s.cpY + t*t*s.ty;
+    
+    // Ball depth (cy interpolated) affects size
+    const curCY = s.originCY + (s.targetCY - s.originCY) * t;
+    const depthScale = 1 - curCY * 0.3; // far = smaller
+    const ballR = Math.max(6, Math.round((14 + (1-t)*4) * depthScale));
+    
+    // Ball shadow on floor (perspective projected)
+    const shadowPt = floorPt(
+      s.sx/courtW + (s.tx/courtW - s.sx/courtW)*t, // rough cx interpolation
+      curCY,
+      courtW, courtH
+    );
+    
+    // Redraw court each frame
+    drawArena(cctx, courtW, courtH, s.game);
+    
+    // Re-draw origin dot
+    cctx.save();
+    cctx.globalAlpha = 0.6;
+    cctx.fillStyle = s.pts===3 ? 'rgba(255,215,0,0.7)' : 'rgba(0,243,255,0.65)';
+    cctx.beginPath(); cctx.arc(s.sx, s.sy, 6, 0, Math.PI*2); cctx.fill();
+    cctx.restore();
+    
+    // Shadow on floor
+    cctx.save();
+    cctx.globalAlpha = 0.25 * (1 - Math.abs(by - shadowPt.y) / (courtH * 0.5));
+    cctx.fillStyle = '#000';
+    cctx.beginPath(); cctx.ellipse(shadowPt.x, shadowPt.y, ballR*1.2, ballR*0.45, 0, 0, Math.PI*2); cctx.fill();
+    cctx.restore();
+    
+    // Trail
+    s.trail.push({ x: bx, y: by, r: ballR });
+    if (s.trail.length > 10) s.trail.shift();
+    s.trail.forEach((pt, idx) => {
+      const a = (idx / s.trail.length) * 0.4;
+      cctx.save(); cctx.globalAlpha = a;
+      cctx.fillStyle = s.pts===3 ? '#ffd700' : '#ff8800';
+      const tr = (idx/s.trail.length) * pt.r * 0.8;
+      cctx.beginPath(); cctx.arc(pt.x, pt.y, Math.max(2, tr), 0, Math.PI*2); cctx.fill();
+      cctx.restore();
+    });
+    
+    // Draw ball
+    s.rot += 0.12 + s.speed * 2;
+    cctx.save();
+    cctx.translate(bx, by);
+    cctx.rotate(s.rot);
+    // Ball gradient
+    const bg = cctx.createRadialGradient(-ballR*0.35, -ballR*0.35, 1, 0, 0, ballR);
+    bg.addColorStop(0, '#ffb05a');
+    bg.addColorStop(0.45, '#e06010');
+    bg.addColorStop(0.8, '#c04000');
+    bg.addColorStop(1, '#7a1800');
+    cctx.fillStyle = bg;
+    cctx.shadowColor = s.pts===3 ? 'rgba(255,215,0,0.6)' : 'rgba(255,100,0,0.5)';
+    cctx.shadowBlur = 12;
+    cctx.beginPath(); cctx.arc(0, 0, ballR, 0, Math.PI*2); cctx.fill();
+    // Seam lines
+    cctx.shadowBlur = 0;
+    cctx.strokeStyle = 'rgba(0,0,0,0.55)'; cctx.lineWidth = 1.2;
+    cctx.beginPath(); cctx.moveTo(-ballR, 0); cctx.lineTo(ballR, 0); cctx.stroke();
+    cctx.beginPath(); cctx.arc(0, 0, ballR*0.65, 0.2, Math.PI-0.2); cctx.stroke();
+    cctx.beginPath(); cctx.arc(0, 0, ballR*0.65, Math.PI+0.2, -0.2); cctx.stroke();
+    cctx.restore();
+    
+    // Rim highlight when ball near basket
+    if (t > 0.75) {
+      const rimAlpha = (t - 0.75) / 0.25;
+      cctx.save();
+      cctx.globalAlpha = rimAlpha * 0.7;
+      cctx.strokeStyle = s.pts===3 ? '#ffd700' : '#ff6000';
+      cctx.lineWidth = 2;
+      cctx.beginPath();
+      cctx.ellipse(s.basket.x, s.basket.y, s.basket.rx*1.1, s.basket.ry*1.1, 0, 0, Math.PI*2);
+      cctx.stroke();
+      cctx.restore();
+    }
+    
+    // Distance label mid-arc
+    if (t > 0.2 && t < 0.55) {
+      cctx.save(); cctx.globalAlpha = 0.8;
+      cctx.font = "bold 11px 'Space Mono', monospace";
+      cctx.fillStyle = s.pts===3 ? '#ffd700' : '#00f3ff';
+      cctx.textAlign = 'center';
+      cctx.fillText(Math.round(s.distFt) + ' FT', bx, by - ballR - 6);
+      cctx.restore();
+    }
+    
+    // SCORED — basket flash and label
+    if (t >= 1 && !s.scored) {
+      s.scored = true;
+      // Flash
+      cctx.save();
+      const flashGr = cctx.createRadialGradient(s.basket.x, s.basket.y, 0, s.basket.x, s.basket.y, 55);
+      flashGr.addColorStop(0, s.pts===3 ? 'rgba(255,215,0,1)' : 'rgba(0,243,255,0.95)');
+      flashGr.addColorStop(0.5, s.pts===3 ? 'rgba(255,215,0,0.4)' : 'rgba(0,243,255,0.3)');
+      flashGr.addColorStop(1, 'transparent');
+      cctx.fillStyle = flashGr;
+      cctx.beginPath(); cctx.arc(s.basket.x, s.basket.y, 55, 0, Math.PI*2); cctx.fill();
+      // Label
+      cctx.font = "bold 22px 'Bebas Neue', sans-serif";
+      cctx.fillStyle = s.pts===3 ? '#ffd700' : '#00f3ff';
+      cctx.textAlign = 'center';
+      cctx.shadowColor = s.pts===3 ? '#ffd700' : '#00f3ff'; cctx.shadowBlur = 20;
+      cctx.fillText(s.pts===3 ? 'THREE! 🔥' : s.pts===1 ? 'FREE THROW' : 'BUCKET!', s.basket.x, s.basket.y - 55);
+      cctx.restore();
+      // Let it linger 1.5s then deactivate
+      const capturedS = s;
+      setTimeout(() => { capturedS.active = false; }, 1500);
+    }
+    
+    any = true;
+  }
+  
+  if (any) {
+    courtAnimId = requestAnimationFrame(courtRenderLoopPerspective);
+  } else {
+    courtAnimId = null;
+    // Leave final frame visible
+  }
+}
+
+function courtRenderLoop_fallback(pts, playerName, game) {
+  // Fallback if basket coords not computed — just draw static
+  drawArena(cctx, courtW, courtH, game);
+}
+
+// Keep old name aliases so nothing else breaks
+const courtRenderLoop = courtRenderLoopPerspective;
 
 // =============================================================================
 // BOOT
