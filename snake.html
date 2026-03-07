@@ -1,313 +1,556 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NEXUS APEX // STADIUM ABSOLUTE</title>
-    <style>
-        :root {
-            --glass: rgba(5, 8, 15, 0.85);
-            --border: rgba(255, 255, 255, 0.25);
-            --cyan: #00f3ff;
-            --gold: #ffcf40;
-            --magenta: #ff007f;
-            --green: #00ff88;
-            --red: #ff3333;
-            --font-mono: 'JetBrains Mono', monospace;
-            --blur: blur(80px) saturate(250%);
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NEXUS APEX BROADCAST ENGINE</title>
 
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'SF Pro Display', sans-serif; user-select: none; }
-        body { background: #000; color: #fff; overflow: hidden; height: 100vh; position: relative; }
+<style>
 
-        /* =======================================================================
-           1. THE IMAX SHOT THEATER (REAL ASSETS ONLY)
-           ======================================================================= */
-        #stadiumTheater {
-            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-            z-index: 10000; pointer-events: none; display: none;
-            background: radial-gradient(circle at center, rgba(0,0,0,0.1) 0%, #000 100%);
-            backdrop-filter: blur(20px);
-        }
-        #theaterCanvas { width: 100%; height: 100%; filter: drop-shadow(0 0 30px #000); }
+:root{
+--glass:rgba(5,8,15,0.88);
+--border:rgba(255,255,255,0.2);
+--cyan:#00f3ff;
+--gold:#ffcf40;
+--magenta:#ff007f;
+--green:#00ff88;
+--red:#ff3333;
+--blur:blur(80px) saturate(250%);
+--font-mono:'JetBrains Mono',monospace;
+}
 
-        /* =======================================================================
-           2. AMBIENT PHYSICS & BACKGROUND
-           ======================================================================= */
-        #particleCanvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; pointer-events: none; opacity: 0.5; }
-        .orb { position: absolute; border-radius: 50%; filter: blur(200px); opacity: 0.4; z-index: 0; animation: fluid 40s infinite alternate; }
-        .orb-1 { width: 1000px; height: 1000px; background: #001f4d; top: -10%; left: -10%; }
-        .orb-2 { width: 800px; height: 800px; background: #3d004d; bottom: -10%; right: -10%; }
-        @keyframes fluid { 100% { transform: translate(150px, 100px) scale(1.1); } }
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:'SF Pro Display',sans-serif;
+}
 
-        /* =======================================================================
-           3. MASTER GRID ARCHITECTURE
-           ======================================================================= */
-        .nexus-header {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100px;
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 0 60px; z-index: 1000; background: rgba(0,0,0,0.5);
-            backdrop-filter: blur(30px); border-bottom: 2px solid var(--border);
-        }
-        .sys-info { font-size: 0.8rem; font-weight: 900; color: var(--cyan); letter-spacing: 2px; text-transform: uppercase; }
+body{
+background:#000;
+color:#fff;
+overflow:hidden;
+height:100vh;
+}
 
-        .master-grid {
-            display: grid; grid-template-columns: 460px 1fr; gap: 35px;
-            padding: 135px 35px 35px 35px; height: 100vh; position: relative; z-index: 10;
-        }
+#arenaStage{
+position:fixed;
+top:0;
+left:0;
+width:100vw;
+height:100vh;
+display:none;
+z-index:10000;
+background:radial-gradient(circle,#00000088,#000);
+backdrop-filter:blur(40px);
+}
 
-        .panel {
-            background: var(--glass); backdrop-filter: var(--blur); -webkit-backdrop-filter: var(--blur);
-            border: 2px solid var(--border); border-top: 2px solid rgba(255,255,255,0.4);
-            border-radius: 50px; box-shadow: 0 80px 160px rgba(0,0,0,1);
-            display: flex; flex-direction: column; overflow: hidden;
-        }
+#arenaCanvas{
+width:100%;
+height:100%;
+}
 
-        .panel-head { padding: 40px; border-bottom: 1.5px solid var(--border); background: rgba(0,0,0,0.3); }
-        .panel-body { padding: 35px; overflow-y: auto; flex-grow: 1; display: flex; flex-direction: column; gap: 35px; }
+#particleCanvas{
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+z-index:1;
+opacity:.6;
+pointer-events:none;
+}
 
-        /* =======================================================================
-           4. GOOGLE HOME COMMAND HUB (12 PRESETS)
-           ======================================================================= */
-        .input-mega { width: 100%; background: rgba(0,0,0,0.5); border: 3px solid var(--border); color: #fff; padding: 25px; border-radius: 25px; font-size: 1.2rem; outline: none; transition: 0.3s; }
-        .input-mega:focus { border-color: var(--cyan); box-shadow: 0 0 30px rgba(0,243,255,0.2); }
-        
-        .btn-relay { background: var(--cyan); color: #000; padding: 25px; border-radius: 25px; font-weight: 950; text-transform: uppercase; cursor: pointer; border: none; font-size: 1.1rem; }
-        .btn-relay:hover { box-shadow: 0 0 50px var(--cyan); transform: translateY(-4px); }
+.nexus-header{
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100px;
+display:flex;
+align-items:center;
+justify-content:space-between;
+padding:0 60px;
+background:#0008;
+backdrop-filter:blur(40px);
+border-bottom:2px solid var(--border);
+z-index:1000;
+}
 
-        .soundboard { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .sb-node { background: rgba(255,255,255,0.05); border: 1.5px solid var(--border); color: #888; padding: 18px; border-radius: 20px; font-size: 0.75rem; font-weight: 900; cursor: pointer; text-align: center; }
-        .sb-node:hover { background: rgba(0,243,255,0.15); color: var(--cyan); border-color: var(--cyan); }
+.header-brand{
+font-size:2.2rem;
+font-weight:950;
+letter-spacing:-3px;
+}
 
-        /* =======================================================================
-           5. SPORTS TELEMETRY GRID
-           ======================================================================= */
-        .matrix-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(400px, 1fr)); gap: 35px; }
-        .card {
-            background: rgba(255,255,255,0.03); border: 2px solid var(--border); border-radius: 40px;
-            padding: 35px; transition: 0.5s; cursor: pointer; position: relative;
-        }
-        .card:hover { transform: translateY(-12px); border-color: var(--cyan); background: rgba(255,255,255,0.06); }
+.sys-clock{
+font-family:var(--font-mono);
+color:var(--cyan);
+}
 
-        .logo-frame { width: 70px; height: 70px; background: #fff; border-radius: 50%; padding: 10px; border: 3px solid transparent; transition: 0.4s; }
-        .possession { border-color: var(--cyan); box-shadow: 0 0 35px var(--cyan); }
-        .score-val { font-size: 3.5rem; font-weight: 950; font-family: var(--font-mono); }
+.master-layout{
+display:grid;
+grid-template-columns:480px 1fr;
+gap:40px;
+padding:140px 40px 40px 40px;
+height:100vh;
+z-index:10;
+position:relative;
+}
 
-        .game-footer { margin-top: 25px; padding-top: 25px; border-top: 1.5px solid rgba(255,255,255,0.05); display: flex; justify-content: space-between; align-items: center; }
-        .timer-pro { font-family: var(--font-mono); font-size: 1.4rem; font-weight: 950; color: var(--cyan); }
-        .play-desc { font-size: 0.8rem; color: #555; font-style: italic; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 60%; }
+.panel{
+background:var(--glass);
+border:1px solid var(--border);
+border-radius:56px;
+backdrop-filter:var(--blur);
+box-shadow:0 80px 160px rgba(0,0,0,1);
+display:flex;
+flex-direction:column;
+overflow:hidden;
+}
 
-        #term { background: rgba(0,0,0,0.6); border-radius: 30px; padding: 30px; font-family: var(--font-mono); font-size: 0.85rem; color: #444; height: 220px; overflow-y: auto; border: 2.5px solid var(--border); }
-    </style>
+.panel-head{
+padding:40px;
+border-bottom:2px solid var(--border);
+}
+
+.panel-body{
+padding:40px;
+overflow:auto;
+flex-grow:1;
+display:flex;
+flex-direction:column;
+gap:40px;
+}
+
+.matrix{
+display:grid;
+grid-template-columns:repeat(auto-fill,minmax(420px,1fr));
+gap:40px;
+}
+
+.card{
+background:#ffffff08;
+border:2px solid var(--border);
+border-radius:48px;
+padding:40px;
+transition:.4s;
+}
+
+.card:hover{
+border-color:var(--cyan);
+transform:translateY(-10px);
+}
+
+.score-row{
+display:flex;
+justify-content:space-between;
+align-items:center;
+margin-bottom:20px;
+}
+
+.val-large{
+font-size:3.6rem;
+font-weight:900;
+font-family:var(--font-mono);
+}
+
+.clock{
+font-family:var(--font-mono);
+color:var(--cyan);
+}
+
+.play{
+font-size:.85rem;
+color:#888;
+max-width:60%;
+overflow:hidden;
+text-overflow:ellipsis;
+white-space:nowrap;
+}
+
+</style>
 </head>
+
 <body>
 
-    <div id="stadiumTheater"><canvas id="theaterCanvas"></canvas></div>
-    <div class="ambient-layer"><div class="orb orb-1"></div><div class="orb orb-2"></div></div>
-    <canvas id="particleCanvas"></canvas>
+<div id="arenaStage">
+<canvas id="arenaCanvas"></canvas>
+</div>
 
-    <header class="nexus-header">
-        <div style="font-size: 2.2rem; font-weight: 950; letter-spacing: -3px;">NEXUS <span style="color:var(--cyan);">STADIUM v35</span></div>
-        <div class="sys-info">JAAP // BERKELEY CITY COLLEGE // BROADCAST SECURE</div>
-    </header>
+<header class="nexus-header">
+<div class="header-brand">NEXUS APEX</div>
+<div id="sysClock" class="sys-clock"></div>
+</header>
 
-    <div class="master-grid">
-        <div class="panel">
-            <div class="panel-head">
-                <div style="font-size: 1.5rem; font-weight: 950;">Google Home Node</div>
-                <div id="clock" style="color:var(--cyan); font-weight:900; margin-top:5px;">00:00:00.000</div>
-            </div>
-            <div class="panel-body">
-                <input type="text" id="msg" class="input-mega" placeholder="Broadcast to Jaap's Room...">
-                <button class="btn-relay" onclick="fireRelay()">Execute Broadcast</button>
+<div class="master-layout">
 
-                <div class="soundboard">
-                    <button class="sb-node" onclick="macro('Dinner is ready! Come to the table.')">🍕 Dinner</button>
-                    <button class="sb-node" onclick="macro('Attention, bedtime protocol starting.')">🌙 Bedtime</button>
-                    <button class="sb-node" onclick="macro('Focus mode enabled. I am studying.')">📚 Study</button>
-                    <button class="sb-node" onclick="macro('Wake up! Time for Berkeley class.')">☀️ Wake Up</button>
-                    <button class="sb-node" onclick="macro('Jasjeet, check the front door.')">🧔 Dad</button>
-                    <button class="sb-node" onclick="macro('Gaganpreet, I need some help.')">👩 Mom</button>
-                    <button class="sb-node" onclick="macro('Kulbir, how are you doing?')">👴 Grandpa</button>
-                    <button class="sb-node" onclick="macro('Go Seahawks! Touchdown!')">🏈 Seahawks</button>
-                    <button class="sb-node" onclick="macro('Security Alert: Door Breach.')">🚨 Alert</button>
-                    <button class="sb-node" onclick="macro('The basketball game is starting!')">🏀 Tip Off</button>
-                </div>
+<div class="panel">
 
-                <div id="term">> KERNEL v35.0 LOADED...<br>> RELAY: SCRYPTED ACTIVE.</div>
-            </div>
-        </div>
+<div class="panel-head">
+Command Terminal
+</div>
 
-        <div class="panel">
-            <div class="panel-head" style="display:flex; justify-content:space-between; align-items:center;">
-                <div style="font-size: 1.5rem; font-weight: 950;">Pro-Telemetry Matrix</div>
-                <div style="font-size: 0.8rem; color:var(--green); font-weight:900;">● LIVE SATELLITE LINK</div>
-            </div>
-            <div class="panel-body">
-                <div class="matrix-grid" id="matrix"></div>
-            </div>
-        </div>
-    </div>
+<div class="panel-body">
+<div id="termLog"></div>
+</div>
 
-    <script>
-        const SCRYPTED_URL = "https://pets-hdtv-enormous-objects.trycloudflare.com/endpoint/@scrypted/webhook/public/33/fe2475e0d68cf025/turnOn";
-        let scoreState = {};
-        let localClocks = {};
+</div>
 
-        async function fireRelay() {
-            const val = document.getElementById('msg').value; if(!val) return;
-            try { 
-                await fetch(SCRYPTED_URL, { method: 'GET', mode: 'no-cors' }); 
-                setTimeout(() => fetch(SCRYPTED_URL, { method: 'GET', mode: 'no-cors' }), 450);
-                document.getElementById('term').innerHTML += `<br>> Relay Sent: ${val}`; 
-            } catch(e){}
-            document.getElementById('msg').value = "";
-        }
-        function macro(m) { document.getElementById('msg').value = m; fireRelay(); }
+<div class="panel">
 
-        const APIS = [
-            { id: "NBA", url: "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/scoreboard" },
-            { id: "NCAA", url: "https://site.api.espn.com/apis/site/v2/sports/basketball/mens-college-basketball/scoreboard" }
-        ];
+<div class="panel-head">
+Arena Telemetry
+</div>
 
-        async function poll() {
-            let list = [];
-            for (let api of APIS) {
-                try {
-                    let res = await fetch(api.url); let json = await res.json();
-                    json.events.forEach(g => {
-                        if(g.status.type.state === 'in') {
-                            let c = g.competitions[0];
-                            let game = {
-                                id: g.id, l: api.id, clock: g.status.displayClock,
-                                play: c.situation?.lastPlay?.text || "Synchronizing...",
-                                athleteId: c.situation?.lastPlay?.athletes?.[0]?.id || null,
-                                pos: c.situation?.possession || null,
-                                h: { id: c.competitors[0].id, n: c.competitors[0].team.shortDisplayName, s: parseInt(c.competitors[0].score), i: c.competitors[0].team.logo },
-                                a: { id: c.competitors[1].id, n: c.competitors[1].team.shortDisplayName, s: parseInt(c.competitors[1].score), i: c.competitors[1].team.logo }
-                            };
-                            list.push(game);
-                            syncClock(game.id, game.clock);
-                        }
-                    });
-                } catch(e){}
-            }
-            render(list);
-        }
+<div class="panel-body">
 
-        function render(data) {
-            const m = document.getElementById('matrix');
-            if(data.length === 0) { m.innerHTML = "AWAITING LIVE DATA..."; return; }
-            m.innerHTML = data.map(g => `
-                <div class="card">
-                    <div style="font-size:0.8rem;font-weight:950;color:#444;margin-bottom:20px;">${g.l} TELEMETRY</div>
-                    <div class="team-line" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
-                        <div style="display:flex;align-items:center;gap:20px;">
-                            <div class="logo-frame ${g.pos == g.a.id ? 'possession' : ''}"><img src="${g.a.i}" style="width:100%;height:100%;object-fit:contain;"></div>
-                            <strong style="font-size:1.4rem;">${g.a.n}</strong>
-                        </div>
-                        <div class="score-val">${g.a.s}</div>
-                    </div>
-                    <div class="team-line" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
-                        <div style="display:flex;align-items:center;gap:20px;">
-                            <div class="logo-frame ${g.pos == g.h.id ? 'possession' : ''}"><img src="${g.h.i}" style="width:100%;height:100%;object-fit:contain;"></div>
-                            <strong style="font-size:1.4rem;">${g.h.n}</strong>
-                        </div>
-                        <div class="score-val">${g.h.s}</div>
-                    </div>
-                    <div class="game-footer">
-                        <div class="timer-pro" id="c_${g.id}">${g.clock}</div>
-                        <div class="play-desc">${g.play}</div>
-                    </div>
-                </div>
-            `).join('');
+<div id="matrix" class="matrix"></div>
 
-            data.forEach(g => {
-                if(scoreState[`${g.id}_a`] < g.a.s) startCinema(g, 'a');
-                if(scoreState[`${g.id}_h`] < g.h.s) startCinema(g, 'h');
-                scoreState[`${g.id}_a`] = g.a.s; scoreState[`${g.id}_h`] = g.h.s;
-            });
-        }
+</div>
 
-        // --- THE CINEMA ENGINE (REAL ASSETS) ---
-        const theater = document.getElementById('theaterCanvas');
-        const tx = theater.getContext('2d');
-        const athlete = new Image();
-        const bball = new Image(); bball.src = 'https://i.imgur.com/vHqC6M7.png';
-        const hoop = new Image(); hoop.src = 'https://i.imgur.com/vUoO8gV.png'; // High-res Rim Asset
-        const court = new Image(); court.src = 'https://i.imgur.com/8Q2Wq4U.jpeg'; // Real Wood Court
+</div>
 
-        function startCinema(game, side) {
-            const stage = document.getElementById('stadiumTheater');
-            stage.style.display = 'block';
-            theater.width = window.innerWidth; theater.height = window.innerHeight;
+</div>
 
-            const isDeep = game.play.includes("three") || game.play.includes("foot");
-            athlete.src = game.athleteId ? `https://a.espncdn.com/i/headshots/nba/players/full/${game.athleteId}.png` : `https://a.espncdn.com/i/teamlogos/default-team-logo-500.png`;
-            
-            athlete.onload = () => runIMAX(isDeep);
-        }
+<script>
 
-        function runIMAX(isDeep) {
-            let f = 0; const rimX = theater.width * 0.9; const rimY = theater.height * 0.4;
-            let startX = isDeep ? 200 : 550;
-            let ball = { x: startX + 150, y: theater.height * 0.75, vx: (rimX - 80 - startX)/65, vy: isDeep ? -36 : -22, active: false, r: 0 };
+/* ===============================
+DATA SOURCES
+=============================== */
 
-            function loop() {
-                tx.clearRect(0,0,theater.width,theater.height);
+const SOURCES=[
 
-                // Draw Real Court Background
-                tx.drawImage(court, 0, theater.height * 0.8, theater.width, theater.height * 0.2);
+{ id:"NBA",
+url:"https://site.api.espn.com/apis/site/v2/sports/basketball/nba/scoreboard"},
 
-                // Draw Real Hoop Asset
-                tx.drawImage(hoop, rimX - 180, rimY - 50, 200, 300);
+{ id:"NCAA",
+url:"https://site.api.espn.com/apis/site/v2/sports/basketball/mens-college-basketball/scoreboard"}
 
-                // Draw Real Athlete
-                let jump = (f > 25 && f < 65) ? -90 : 0;
-                tx.drawImage(athlete, startX, theater.height * 0.75 + jump - 220, 320, 320);
+]
 
-                if(f === 48) ball.active = true;
-                if(ball.active) {
-                    ball.x += ball.vx; ball.y += ball.vy; ball.vy += 0.8; ball.r += 0.3;
-                    tx.save(); tx.translate(ball.x, ball.y); tx.rotate(ball.r);
-                    tx.drawImage(bball, -25, -25, 50, 50); tx.restore();
-                }
+let scoreVault={}
 
-                f++;
-                if(f < 120) requestAnimationFrame(loop);
-                else document.getElementById('stadiumTheater').style.display = 'none';
-            }
-            loop();
-        }
+/* ===============================
+SHOT PARSING ENGINE
+=============================== */
 
-        function syncClock(id, raw) {
-            if(!raw || !raw.includes(":")) return;
-            let p = raw.split(":"); let t = (parseInt(p[0])*60) + parseInt(p[1]);
-            if(!localClocks[id] || Math.abs(localClocks[id]-t) > 5) localClocks[id] = t;
-        }
-        setInterval(() => {
-            for(let id in localClocks) {
-                if(localClocks[id] > 0) {
-                    localClocks[id]--;
-                    let m = Math.floor(localClocks[id]/60); let s = String(localClocks[id]%60).padStart(2,'0');
-                    let el = document.getElementById(`c_${id}`); if(el && !el.innerText.includes("End")) el.innerText = `${m}:${s}`;
-                }
-            }
-        }, 1000);
+function parseShotDistance(play){
 
-        const pC = document.getElementById('particleCanvas'); const pX = pC.getContext('2d');
-        let pts = [];
-        function initP() {
-            pC.width = window.innerWidth; pC.height = window.innerHeight;
-            for(let i=0; i<100; i++) pts.push({ x: Math.random()*pC.width, y: Math.random()*pC.height, s: Math.random()*3, vx: Math.random()*0.4-0.2, vy: Math.random()*0.4-0.2 });
-        }
-        function drawP() {
-            pX.clearRect(0,0,pC.width,pC.height); pX.fillStyle = "rgba(0, 243, 255, 0.4)";
-            pts.forEach(p => { p.x+=p.vx; p.y+=p.vy; if(p.x<0||p.x>pC.width) p.vx*=-1; if(p.y<0||p.y>pC.height) p.vy*=-1; pX.beginPath(); pX.arc(p.x, p.y, p.s, 0, Math.PI*2); pX.fill(); });
-            requestAnimationFrame(drawP);
-        }
-        initP(); drawP(); poll(); setInterval(poll, 15000);
-        setInterval(() => { const d = new Date(); document.getElementById('clock').innerText = d.toLocaleTimeString('en-US', {hour12:false}) + "." + d.getMilliseconds(); }, 50);
-    </script>
+let match=play.match(/(\d+)[-\s]?foot/i)
+
+if(match) return parseInt(match[1])
+
+if(play.includes("three")) return 24
+
+return 10
+
+}
+
+function detectShotType(play){
+
+play=play.toLowerCase()
+
+if(play.includes("dunk")||play.includes("slam"))
+return "dunk"
+
+if(play.includes("layup"))
+return "layup"
+
+if(play.includes("three"))
+return "three"
+
+return "jumper"
+
+}
+
+/* ===============================
+DATA POLLING
+=============================== */
+
+async function pollTelemetry(){
+
+let events=[]
+
+for(let src of SOURCES){
+
+try{
+
+let r=await fetch(src.url)
+let j=await r.json()
+
+j.events.forEach(g=>{
+
+if(g.status.type.state==="in"){
+
+let c=g.competitions[0]
+
+events.push({
+
+id:g.id,
+league:src.id,
+clock:g.status.displayClock,
+play:c.situation?.lastPlay?.text||"",
+athleteId:c.situation?.lastPlay?.athletes?.[0]?.id||null,
+
+h:{
+name:c.competitors[0].team.shortDisplayName,
+score:+c.competitors[0].score,
+logo:c.competitors[0].team.logo
+},
+
+a:{
+name:c.competitors[1].team.shortDisplayName,
+score:+c.competitors[1].score,
+logo:c.competitors[1].team.logo
+}
+
+})
+
+}
+
+})
+
+}catch(e){}
+
+}
+
+renderMatrix(events)
+
+}
+
+setInterval(pollTelemetry,15000)
+pollTelemetry()
+
+/* ===============================
+UI RENDER
+=============================== */
+
+function renderMatrix(games){
+
+const m=document.getElementById("matrix")
+
+m.innerHTML=games.map(g=>`
+
+<div class="card">
+
+<div class="score-row">
+${g.a.name}
+<div class="val-large">${g.a.score}</div>
+</div>
+
+<div class="score-row">
+${g.h.name}
+<div class="val-large">${g.h.score}</div>
+</div>
+
+<div class="score-row">
+<div class="clock">${g.clock}</div>
+<div class="play">${g.play}</div>
+</div>
+
+</div>
+
+`).join("")
+
+games.forEach(g=>{
+
+if(scoreVault[g.id+"a"]!=null && g.a.score>scoreVault[g.id+"a"])
+startArenaAnimation(g)
+
+if(scoreVault[g.id+"h"]!=null && g.h.score>scoreVault[g.id+"h"])
+startArenaAnimation(g)
+
+scoreVault[g.id+"a"]=g.a.score
+scoreVault[g.id+"h"]=g.h.score
+
+})
+
+}
+
+/* ===============================
+ASSETS
+=============================== */
+
+const arenaCanvas=document.getElementById("arenaCanvas")
+const ctx=arenaCanvas.getContext("2d")
+
+const assets={
+court:new Image(),
+rim:new Image(),
+ball:new Image()
+}
+
+assets.court.src="https://i.imgur.com/8Q2Wq4U.jpeg"
+assets.rim.src="https://i.imgur.com/vUoO8gV.png"
+assets.ball.src="https://i.imgur.com/vHqC6M7.png"
+
+async function loadPlayer(id){
+
+return new Promise(res=>{
+
+let img=new Image()
+
+img.src=id?
+`https://a.espncdn.com/i/headshots/nba/players/full/${id}.png`
+:
+"https://a.espncdn.com/i/teamlogos/default-team-logo-500.png"
+
+img.onload=()=>res(img)
+
+})
+
+}
+
+/* ===============================
+ARENA FX ENGINE
+=============================== */
+
+let particles=[]
+
+function spawnExplosion(x,y){
+
+for(let i=0;i<120;i++){
+
+particles.push({
+
+x:x,
+y:y,
+vx:(Math.random()-.5)*14,
+vy:(Math.random()-.5)*14,
+life:100
+
+})
+
+}
+
+}
+
+function updateParticles(){
+
+particles.forEach(p=>{
+
+p.x+=p.vx
+p.y+=p.vy
+p.life--
+
+ctx.beginPath()
+ctx.arc(p.x,p.y,3,0,Math.PI*2)
+ctx.fillStyle="#ffcf40"
+ctx.fill()
+
+})
+
+particles=particles.filter(p=>p.life>0)
+
+}
+
+/* ===============================
+MAIN ARENA ANIMATION
+=============================== */
+
+async function startArenaAnimation(game){
+
+const stage=document.getElementById("arenaStage")
+stage.style.display="block"
+
+arenaCanvas.width=innerWidth
+arenaCanvas.height=innerHeight
+
+const player=await loadPlayer(game.athleteId)
+
+let play=game.play
+let shotType=detectShotType(play)
+let dist=parseShotDistance(play)
+
+let hoopX=arenaCanvas.width*.85
+let hoopY=arenaCanvas.height*.35
+
+let playerX=arenaCanvas.width*.2
+let playerY=arenaCanvas.height*.75
+
+let frame=0
+
+let ball={
+x:playerX+120,
+y:playerY-100,
+vx:(hoopX-playerX)/(90+dist),
+vy:-20-(dist/5),
+rot:0
+}
+
+function animate(){
+
+ctx.clearRect(0,0,arenaCanvas.width,arenaCanvas.height)
+
+ctx.drawImage(assets.court,
+0,
+arenaCanvas.height*.75,
+arenaCanvas.width,
+arenaCanvas.height*.25)
+
+ctx.drawImage(assets.rim,hoopX-160,hoopY-80,200,320)
+
+ctx.drawImage(player,playerX,playerY-260,280,280)
+
+if(frame>30){
+
+ball.x+=ball.vx
+ball.y+=ball.vy
+ball.vy+=0.8
+ball.rot+=0.2
+
+ctx.save()
+
+ctx.translate(ball.x,ball.y)
+ctx.rotate(ball.rot)
+
+ctx.drawImage(assets.ball,-30,-30,60,60)
+
+ctx.restore()
+
+}
+
+if(frame===80){
+
+spawnExplosion(hoopX,hoopY)
+
+}
+
+updateParticles()
+
+frame++
+
+if(frame<200){
+
+requestAnimationFrame(animate)
+
+}else{
+
+stage.style.display="none"
+
+}
+
+}
+
+animate()
+
+}
+
+/* ===============================
+SYSTEM CLOCK
+=============================== */
+
+setInterval(()=>{
+
+let d=new Date()
+
+document.getElementById("sysClock").innerText=
+d.toLocaleTimeString('en-US',{hour12:false})
+
+},40)
+
+</script>
+
 </body>
 </html>
