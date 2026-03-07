@@ -311,6 +311,90 @@
         .pbp-score { font-family: 'Space Mono', monospace; font-size: 0.68rem; color: var(--accent-cyan); min-width: 45px; text-align: right; }
         .pbp-scoring { color: var(--accent-gold) !important; }
 
+
+        /* ---- STAR / TRACK BUTTON ---- */
+        .star-btn {
+            position: absolute; top: 10px; right: 12px; z-index: 20;
+            background: none; border: none; cursor: pointer;
+            font-size: 1.3rem; line-height: 1; padding: 4px 6px;
+            transition: transform 0.25s cubic-bezier(0.175,0.885,0.32,1.275), filter 0.25s;
+            filter: grayscale(1) opacity(0.4);
+        }
+        .star-btn:hover  { transform: scale(1.3); filter: grayscale(0) opacity(0.8); }
+        .star-btn.starred { filter: grayscale(0) opacity(1) drop-shadow(0 0 8px #ffd700); transform: scale(1.15); animation: starPop 0.4s cubic-bezier(0.175,0.885,0.32,1.275); }
+        @keyframes starPop { 0%{transform:scale(1);}50%{transform:scale(1.6);}100%{transform:scale(1.15);} }
+        .game-node.tracked { border-top-color: var(--accent-gold) !important; box-shadow: 0 0 0 1px rgba(255,215,0,0.25), 0 15px 30px rgba(0,0,0,0.4); }
+
+        /* ---- ESPN-STYLE COURT POPUP OVERLAY ---- */
+        #courtOverlay {
+            position: fixed; inset: 0; z-index: 99990;
+            display: flex; align-items: center; justify-content: center;
+            pointer-events: none; opacity: 0;
+            transition: opacity 0.35s ease;
+        }
+        #courtOverlay.active { opacity: 1; pointer-events: all; }
+
+        .court-popup {
+            position: relative;
+            width: min(92vw, 860px);
+            background: rgba(8,10,20,0.97);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 24px;
+            box-shadow: 0 40px 100px rgba(0,0,0,0.9), 0 0 0 1px rgba(255,255,255,0.05);
+            overflow: hidden;
+            transform: scale(0.88) translateY(30px);
+            transition: transform 0.4s cubic-bezier(0.25,0.8,0.25,1);
+        }
+        #courtOverlay.active .court-popup { transform: scale(1) translateY(0); }
+
+        .court-popup-header {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 14px 20px 12px;
+            border-bottom: 1px solid rgba(255,255,255,0.07);
+        }
+        .court-popup-teams { display: flex; align-items: center; gap: 14px; }
+        .court-popup-logo  { width: 34px; height: 34px; object-fit: contain; background: rgba(255,255,255,0.9); border-radius: 50%; padding: 3px; }
+        .court-popup-score { font-family: 'Bebas Neue', sans-serif; font-size: 1.5rem; letter-spacing: 3px; color: #fff; }
+        .court-popup-clock { font-family: 'Space Mono', monospace; font-size: 0.72rem; color: var(--accent-cyan); }
+        .court-popup-close {
+            background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
+            color: #fff; width: 30px; height: 30px; border-radius: 50%; font-size: 1rem;
+            cursor: pointer; display: flex; align-items: center; justify-content: center;
+            transition: var(--transition-smooth);
+        }
+        .court-popup-close:hover { background: var(--alert-red); }
+
+        /* Court canvas */
+        #courtCanvas { display: block; width: 100%; }
+
+        /* Score event banner */
+        .score-event-banner {
+            position: absolute; bottom: 0; left: 0; right: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.95) 60%, transparent);
+            padding: 18px 22px 20px;
+            display: flex; align-items: center; gap: 14px;
+        }
+        .seb-player-img {
+            width: 54px; height: 54px; border-radius: 50%; object-fit: cover; object-position: top;
+            border: 2px solid rgba(255,255,255,0.2); background: rgba(255,255,255,0.1); flex-shrink: 0;
+        }
+        .seb-info { flex: 1; }
+        .seb-player-name { font-family: 'Bebas Neue', sans-serif; font-size: 1.3rem; letter-spacing: 2px; color: #fff; line-height: 1; }
+        .seb-play-text   { font-size: 0.78rem; color: rgba(255,255,255,0.6); margin-top: 3px; line-height: 1.3; }
+        .seb-pts {
+            font-family: 'Bebas Neue', sans-serif; font-size: 2.8rem; letter-spacing: 2px;
+            text-shadow: 0 0 20px currentColor; line-height: 1;
+        }
+        .seb-pts.pts2 { color: var(--accent-cyan); }
+        .seb-pts.pts3 { color: var(--accent-gold); }
+        .seb-pts.pts1 { color: var(--accent-green); }
+
+        .court-shot-label {
+            position: absolute; font-family: 'Bebas Neue', sans-serif; font-size: 0.85rem;
+            letter-spacing: 1px; color: #fff; background: rgba(0,0,0,0.7);
+            padding: 2px 8px; border-radius: 6px; pointer-events: none;
+            transform: translate(-50%, -130%); white-space: nowrap;
+        }
         ::-webkit-scrollbar { width: 5px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
@@ -650,7 +734,7 @@ function renderMatrix(liveArray) {
         let card = document.getElementById(game.uid);
         if (!card) {
             card = document.createElement('div');
-            card.className = 'game-node';
+            card.className = 'game-node'; card.style.position='relative';
             card.id = game.uid;
             card.onclick = () => openModal(game.uid);
             card.innerHTML = buildCard(game);
@@ -670,9 +754,10 @@ function buildCard(g) {
     const af    = tot === 0 ? 0.5 : g.away.score / tot;
     const hf    = 1 - af;
     return `
-        <div class="card-banner">
+        <div class="card-banner" style="position:relative">
             <span class="league-badge ${g.league}">${g.league}</span>
             <span class="clock-badge" id="ck_${g.uid}">${g.clock}</span>
+            <button class="star-btn" id="star_${g.uid}" onclick="event.stopPropagation(); toggleStar('${g.uid}', this)" title="Track this game">⭐</button>
         </div>
         <div class="card-body">
             <div class="competitor-row">
@@ -780,7 +865,13 @@ async function fetchStats(game) {
             const newPlays = json.scoringPlays.slice(prev);
             CORE_MEMORY.scores[game.uid + '_sp'] = json.scoringPlays.length;
             newPlays.forEach((play, i) => {
-                setTimeout(() => fireFromPlay(play, game), i * 1600);
+                setTimeout(() => {
+                    fireFromPlay(play, game);
+                    // If this is the tracked game, fire the ESPN-style court popup
+                    if (trackedGameUID === game.uid) {
+                        triggerCourtAnimation(play, game);
+                    }
+                }, i * 1600);
             });
         }
 
@@ -1100,6 +1191,432 @@ function renderLoop() {
     else      { animFrameId = null; ctx.clearRect(0,0,canvas.width,canvas.height); }
 }
 
+
+// =============================================================================
+// STAR / TRACK SYSTEM + ESPN COURT ANIMATION
+// =============================================================================
+let trackedGameUID = null;
+const courtCanvas  = document.getElementById('courtCanvas');
+const cctx         = courtCanvas.getContext('2d');
+let courtAnimId    = null;
+const courtShots   = [];
+let courtW = 860, courtH = 420;
+
+function toggleStar(uid, btn) {
+    if (trackedGameUID && trackedGameUID !== uid) {
+        // Unstar previous
+        const prevBtn  = document.getElementById('star_' + trackedGameUID);
+        const prevCard = document.getElementById(trackedGameUID);
+        if (prevBtn)  prevBtn.classList.remove('starred');
+        if (prevCard) prevCard.classList.remove('tracked');
+    }
+
+    if (trackedGameUID === uid) {
+        // Untrack
+        trackedGameUID = null;
+        btn.classList.remove('starred');
+        document.getElementById(uid).classList.remove('tracked');
+        sysLog('⭐ Tracking disabled', 't-sys');
+        closeCourtOverlay();
+    } else {
+        trackedGameUID = uid;
+        btn.classList.add('starred');
+        document.getElementById(uid).classList.add('tracked');
+        sysLog('⭐ Now tracking: ' + (CORE_MEMORY.gameData[uid] ? CORE_MEMORY.gameData[uid].away.name + ' vs ' + CORE_MEMORY.gameData[uid].home.name : uid), 't-scs');
+    }
+}
+
+// Called from fetchStats when we detect a NEW scoring play for the tracked game
+function triggerCourtAnimation(play, game) {
+    const txt = (play.text || play.description || '').toLowerCase();
+    let pts = 2;
+    if (txt.includes('three') || txt.includes('3-pointer') || txt.includes('3 pt') || txt.includes('three-point')) pts = 3;
+    if (txt.includes('free throw') || txt.includes('one point')) pts = 1;
+
+    // Parse distance
+    let distFt = pts === 3 ? 24 + Math.random()*8 : (txt.includes('layup')||txt.includes('dunk') ? 2+Math.random()*3 : 8+Math.random()*12);
+    const dm = txt.match(/(\d+)[\s-]?(?:foot|ft)/i);
+    if (dm) distFt = parseInt(dm[1]);
+
+    // Player info
+    let playerName = 'PLAYER', headshotUrl = null, teamLogo = null, teamName = '';
+    if (play.athletesInvolved && play.athletesInvolved[0]) {
+        const a = play.athletesInvolved[0];
+        playerName  = a.shortName || a.displayName || 'PLAYER';
+        headshotUrl = a.headshot ? a.headshot.href : buildHeadshot(a.id, game.league);
+    }
+    if (play.team) {
+        teamName = play.team.shortDisplayName || play.team.displayName || '';
+        teamLogo = play.team.logo || (play.team.id === game.home.id ? game.home.logo : game.away.logo);
+        if (!teamLogo) teamLogo = play.team.id === game.home.id ? game.home.logo : game.away.logo;
+    }
+
+    // Determine which basket (home attacks right basket by convention)
+    const attackRight = play.team && game.home && play.team.id === game.home.id;
+
+    openCourtOverlay(game, pts, distFt, playerName, headshotUrl, play.text || play.description || '', teamLogo, attackRight);
+}
+
+function openCourtOverlay(game, pts, distFt, playerName, headshotUrl, playText, teamLogo, attackRight) {
+    // Update header
+    document.getElementById('cpAwayLogo').src   = game.away.logo;
+    document.getElementById('cpHomeLogo').src   = game.home.logo;
+    document.getElementById('cpAwayScore').innerText = game.away.score;
+    document.getElementById('cpHomeScore').innerText = game.home.score;
+    document.getElementById('cpClock').innerText     = game.clock;
+
+    // Update banner
+    document.getElementById('sebImg').src   = headshotUrl || 'https://a.espncdn.com/combiner/i?img=/i/headshots/nophoto.png&w=110&h=80&scale=crop&location=origin&transparent=true';
+    document.getElementById('sebName').innerText = playerName;
+    document.getElementById('sebText').innerText = playText.length > 80 ? playText.substring(0,78)+'…' : playText;
+    const ptsEl = document.getElementById('sebPts');
+    ptsEl.innerText = '+' + pts;
+    ptsEl.className = 'seb-pts pts' + pts;
+    document.getElementById('sebBanner').style.display = 'flex';
+
+    // Show overlay
+    const overlay = document.getElementById('courtOverlay');
+    overlay.classList.add('active');
+
+    // Resize canvas to actual rendered size
+    const rect = courtCanvas.getBoundingClientRect();
+    courtW = courtCanvas.width  = Math.round(rect.width  || 860);
+    courtH = courtCanvas.height = Math.round(rect.height || 380);
+
+    // Draw court immediately
+    drawCourt(cctx, courtW, courtH, game);
+
+    // Fire ball animation on court
+    launchCourtShot(pts, distFt, attackRight, playerName, headshotUrl, game);
+
+    // Auto-close after 8s
+    clearTimeout(window._courtAutoClose);
+    window._courtAutoClose = setTimeout(() => { overlay.classList.remove('active'); }, 8000);
+}
+
+function closeCourtOverlay(e) {
+    if (!e || e.target.id === 'courtOverlay') {
+        document.getElementById('courtOverlay').classList.remove('active');
+        clearTimeout(window._courtAutoClose);
+    }
+}
+
+// ---- DRAW REALISTIC TOP-DOWN COURT ----
+function drawCourt(ctx, W, H, game) {
+    const WOOD_LIGHT = '#d4a96a';
+    const WOOD_MID   = '#c49558';
+    const WOOD_LINE  = '#ffffff';
+    const PAINT_COLOR = 'rgba(180,80,40,0.18)';
+
+    // Background wood floor
+    ctx.fillStyle = WOOD_LIGHT;
+    ctx.fillRect(0, 0, W, H);
+
+    // Wood grain lines
+    ctx.strokeStyle = WOOD_MID;
+    ctx.lineWidth = 1;
+    for (let y = 0; y < H; y += 7) {
+        ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke();
+    }
+
+    // Court boundary
+    const mx = W*0.04, my = H*0.06, cW = W*0.92, cH = H*0.88;
+    ctx.strokeStyle = WOOD_LINE; ctx.lineWidth = 2.5;
+    ctx.strokeRect(mx, my, cW, cH);
+
+    // Half court line
+    ctx.beginPath(); ctx.moveTo(W/2, my); ctx.lineTo(W/2, my+cH); ctx.stroke();
+
+    // Center circle
+    ctx.beginPath(); ctx.arc(W/2, H/2, H*0.11, 0, Math.PI*2); ctx.stroke();
+    ctx.beginPath(); ctx.arc(W/2, H/2, H*0.025, 0, Math.PI*2); ctx.stroke();
+
+    // ---- LEFT SIDE (away paints/basket) ----
+    drawHalfCourtLeft(ctx, mx, my, cW, cH, W, H, PAINT_COLOR, WOOD_LINE, game ? game.away : null);
+    drawHalfCourtRight(ctx, mx, my, cW, cH, W, H, PAINT_COLOR, WOOD_LINE, game ? game.home : null);
+
+    // Center logos if available
+    if (game) {
+        drawTeamLogoOnCourt(ctx, W*0.5, H*0.5, H*0.1, game.away.logo, game.away.name);
+    }
+}
+
+function drawHalfCourtLeft(ctx, mx, my, cW, cH, W, H, paintColor, lineColor, team) {
+    const rx = mx; // right edge of left half = center
+    const paintW = cW * 0.16;
+    const paintH = cH * 0.36;
+    const paintX = mx;
+    const paintY = my + (cH - paintH) / 2;
+
+    // Paint (key)
+    ctx.fillStyle = paintColor;
+    ctx.fillRect(paintX, paintY, paintW, paintH);
+    ctx.strokeStyle = lineColor; ctx.lineWidth = 2;
+    ctx.strokeRect(paintX, paintY, paintW, paintH);
+
+    // Free throw circle
+    ctx.beginPath(); ctx.arc(paintX+paintW, H/2, paintH/2, -Math.PI/2, Math.PI/2, false); ctx.stroke();
+
+    // 3-point arc (left side)
+    ctx.beginPath();
+    ctx.arc(paintX + paintW*0.28, H/2, cH*0.44, -Math.PI*0.48, Math.PI*0.48, false);
+    ctx.stroke();
+    // Corner 3 lines
+    ctx.beginPath(); ctx.moveTo(paintX, my + cH*0.085); ctx.lineTo(paintX + cW*0.138, my + cH*0.085); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(paintX, my + cH*0.915); ctx.lineTo(paintX + cW*0.138, my + cH*0.915); ctx.stroke();
+
+    // Basket
+    drawBasketLeft(ctx, paintX + paintW*0.1, H/2, lineColor);
+}
+
+function drawHalfCourtRight(ctx, mx, my, cW, cH, W, H, paintColor, lineColor, team) {
+    const paintW = cW * 0.16;
+    const paintH = cH * 0.36;
+    const paintX = mx + cW - paintW;
+    const paintY = my + (cH - paintH) / 2;
+    const rx = mx + cW;
+
+    ctx.fillStyle = paintColor;
+    ctx.fillRect(paintX, paintY, paintW, paintH);
+    ctx.strokeStyle = lineColor; ctx.lineWidth = 2;
+    ctx.strokeRect(paintX, paintY, paintW, paintH);
+
+    ctx.beginPath(); ctx.arc(paintX, H/2, paintH/2, -Math.PI/2, Math.PI/2, true); ctx.stroke();
+
+    ctx.beginPath();
+    ctx.arc(paintX + paintW*0.72, H/2, cH*0.44, Math.PI*0.52, Math.PI*1.48, true);
+    ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(rx, my + cH*0.085); ctx.lineTo(rx - cW*0.138, my + cH*0.085); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(rx, my + cH*0.915); ctx.lineTo(rx - cW*0.138, my + cH*0.915); ctx.stroke();
+
+    drawBasketRight(ctx, paintX + paintW*0.9, H/2, lineColor);
+}
+
+function drawBasketLeft(ctx, x, y, lineColor) {
+    // Backboard
+    ctx.strokeStyle = '#aaa'; ctx.lineWidth = 4;
+    ctx.beginPath(); ctx.moveTo(x-6, y-22); ctx.lineTo(x-6, y+22); ctx.stroke();
+    // Rim
+    ctx.strokeStyle = '#e05000'; ctx.lineWidth = 3;
+    ctx.beginPath(); ctx.arc(x+14, y, 14, 0, Math.PI*2); ctx.stroke();
+    // Net lines
+    ctx.strokeStyle = 'rgba(255,255,255,0.4)'; ctx.lineWidth = 1;
+    for (let i=-3;i<=3;i++) { ctx.beginPath(); ctx.moveTo(x+14+i*3.5,y+14); ctx.lineTo(x+14+i*2.8,y+28); ctx.stroke(); }
+    ctx.beginPath(); ctx.moveTo(x+2,y+28); ctx.lineTo(x+26,y+28); ctx.stroke();
+}
+
+function drawBasketRight(ctx, x, y, lineColor) {
+    ctx.strokeStyle = '#aaa'; ctx.lineWidth = 4;
+    ctx.beginPath(); ctx.moveTo(x+6, y-22); ctx.lineTo(x+6, y+22); ctx.stroke();
+    ctx.strokeStyle = '#e05000'; ctx.lineWidth = 3;
+    ctx.beginPath(); ctx.arc(x-14, y, 14, 0, Math.PI*2); ctx.stroke();
+    ctx.strokeStyle = 'rgba(255,255,255,0.4)'; ctx.lineWidth = 1;
+    for (let i=-3;i<=3;i++) { ctx.beginPath(); ctx.moveTo(x-14+i*3.5,y+14); ctx.lineTo(x-14+i*2.8,y+28); ctx.stroke(); }
+    ctx.beginPath(); ctx.moveTo(x-26,y+28); ctx.lineTo(x-2,y+28); ctx.stroke();
+}
+
+function drawTeamLogoOnCourt(ctx, cx, cy, r, logoUrl, name) {
+    // Draw subtle team initial
+    ctx.save();
+    ctx.globalAlpha = 0.12;
+    ctx.font = `bold ${r*1.8}px 'Bebas Neue', sans-serif`;
+    ctx.fillStyle = '#333';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(name ? name.substring(0,3).toUpperCase() : '', cx, cy);
+    ctx.restore();
+}
+
+// ---- COURT BALL ANIMATION ----
+function launchCourtShot(pts, distFt, attackRight, playerName, headshotUrl, game) {
+    courtShots.length = 0; // clear
+
+    const mx = courtW*0.04, my = courtH*0.06, cW = courtW*0.92, cH = courtH*0.88;
+    const paintW = cW*0.16;
+
+    // Basket positions (top-down X,Y on canvas)
+    let basketX, basketY;
+    if (attackRight) {
+        // Shooting at RIGHT basket
+        basketX = mx + cW - paintW*0.1;
+        basketY = courtH / 2;
+    } else {
+        // Shooting at LEFT basket
+        basketX = mx + paintW*0.1;
+        basketY = courtH / 2;
+    }
+
+    // Map distFt → canvas distance
+    const maxCourtFt = 47; // half court length in feet
+    const courtPxLen = cW * 0.5; // half court in pixels
+    const distPx = Math.min(distFt / maxCourtFt, 1) * courtPxLen * 0.9;
+
+    // Shot origin angle (random valid court position)
+    let angle;
+    if (attackRight) {
+        angle = Math.random() * Math.PI + Math.PI; // left hemisphere
+    } else {
+        angle = Math.random() * Math.PI; // right hemisphere
+    }
+
+    const originX = basketX + Math.cos(angle) * distPx;
+    const originY = basketY + Math.sin(angle) * distPx * 0.6;
+    const clampedX = Math.max(mx+10, Math.min(mx+cW-10, originX));
+    const clampedY = Math.max(my+10, Math.min(my+cH-10, originY));
+
+    // Player headshot image (preload)
+    const playerImg = new Image();
+    if (headshotUrl) playerImg.src = headshotUrl;
+
+    courtShots.push({
+        sx: clampedX, sy: clampedY,
+        tx: basketX, ty: basketY,
+        cpX: (clampedX + basketX) / 2,
+        cpY: Math.min(clampedY, basketY) - courtH * 0.3,
+        t: 0, speed: 0.022,
+        pts, distFt, playerName, playerImg, headshotUrl,
+        rot: 0, trail: [], active: true,
+        game
+    });
+
+    // Mark origin dot
+    cctx.save();
+    cctx.fillStyle = pts === 3 ? 'rgba(255,215,0,0.7)' : 'rgba(0,243,255,0.7)';
+    cctx.beginPath(); cctx.arc(clampedX, clampedY, 10, 0, Math.PI*2); cctx.fill();
+    cctx.strokeStyle = '#fff'; cctx.lineWidth = 2;
+    cctx.beginPath(); cctx.arc(clampedX, clampedY, 10, 0, Math.PI*2); cctx.stroke();
+    cctx.restore();
+
+    // Draw dotted shot arc path preview
+    drawShotPath(cctx, clampedX, clampedY, basketX, basketY, pts);
+
+    // Distance label at origin
+    cctx.save();
+    cctx.font = "bold 12px 'Space Mono', monospace";
+    cctx.fillStyle = pts === 3 ? '#ffd700' : '#00f3ff';
+    cctx.textAlign = 'center';
+    cctx.fillText(Math.round(distFt) + ' FT', clampedX, clampedY - 16);
+    cctx.restore();
+
+    // Draw shooter name above origin
+    cctx.save();
+    cctx.font = "bold 13px 'Rajdhani', sans-serif";
+    cctx.fillStyle = 'rgba(255,255,255,0.9)';
+    cctx.textAlign = 'center';
+    cctx.fillText(playerName, clampedX, clampedY - 30);
+    cctx.restore();
+
+    if (!courtAnimId) courtRenderLoop();
+}
+
+function drawShotPath(ctx, sx, sy, tx, ty, pts) {
+    const steps = 40;
+    const cpX = (sx+tx)/2, cpY = Math.min(sy,ty) - courtH*0.3;
+    ctx.save();
+    ctx.setLineDash([4,6]);
+    ctx.strokeStyle = pts===3 ? 'rgba(255,215,0,0.4)' : 'rgba(0,243,255,0.35)';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    for (let i=0;i<=steps;i++) {
+        const t=i/steps;
+        const x=(1-t)*(1-t)*sx+2*(1-t)*t*cpX+t*t*tx;
+        const y=(1-t)*(1-t)*sy+2*(1-t)*t*cpY+t*t*ty;
+        i===0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
+    }
+    ctx.stroke();
+    ctx.restore();
+}
+
+function courtRenderLoop() {
+    // Redraw background court each frame (just ball layer — court is static under)
+    // Only clear and redraw animated ball elements on top
+    let any = false;
+
+    for (let i = courtShots.length-1; i>=0; i--) {
+        const s = courtShots[i];
+        if (!s.active) { courtShots.splice(i,1); continue; }
+        s.t = Math.min(s.t + s.speed, 1);
+        const t = s.t;
+        const cpX = s.cpX;
+        const x = (1-t)*(1-t)*s.sx + 2*(1-t)*t*cpX + t*t*s.tx;
+        const y = (1-t)*(1-t)*s.sy + 2*(1-t)*t*s.cpY + t*t*s.ty;
+
+        s.trail.push({x,y});
+        if (s.trail.length>12) s.trail.shift();
+
+        // Clear just ball region (rough bounding box around ball path + small buffer)
+        // Actually, redraw the entire canvas each frame for clean animation
+        // We'll do a two-canvas approach: redraw court+static, then ball on top
+        drawCourt(cctx, courtW, courtH, s.game);
+        drawShotPath(cctx, s.sx, s.sy, s.tx, s.ty, s.pts);
+
+        // Re-draw origin marker
+        cctx.save();
+        cctx.fillStyle = s.pts===3?'rgba(255,215,0,0.6)':'rgba(0,243,255,0.6)';
+        cctx.beginPath(); cctx.arc(s.sx,s.sy,9,0,Math.PI*2); cctx.fill();
+        cctx.restore();
+
+        // Trail
+        s.trail.forEach((pt,idx) => {
+            const a = (idx/s.trail.length)*0.6;
+            cctx.save(); cctx.globalAlpha=a;
+            cctx.fillStyle = s.pts===3?'#ffd700':'#ff8800';
+            const r = (idx/s.trail.length)*7+2;
+            cctx.beginPath(); cctx.arc(pt.x,pt.y,r,0,Math.PI*2); cctx.fill();
+            cctx.restore();
+        });
+
+        // Ball (top-down view = circle with lines)
+        s.rot += 0.15;
+        const ballR = 13;
+        cctx.save(); cctx.translate(x,y); cctx.rotate(s.rot);
+        const g2 = cctx.createRadialGradient(-4,-4,2,0,0,ballR);
+        g2.addColorStop(0,'#ff9a3c'); g2.addColorStop(0.6,'#cc5500'); g2.addColorStop(1,'#7a2200');
+        cctx.fillStyle = g2;
+        cctx.beginPath(); cctx.arc(0,0,ballR,0,Math.PI*2); cctx.fill();
+        cctx.strokeStyle='rgba(0,0,0,0.5)'; cctx.lineWidth=1.5;
+        cctx.beginPath(); cctx.moveTo(-ballR,0); cctx.lineTo(ballR,0); cctx.stroke();
+        cctx.beginPath(); cctx.arc(0,0,ballR*0.7,0.15,Math.PI-0.15); cctx.stroke();
+        cctx.beginPath(); cctx.arc(0,0,ballR*0.7,Math.PI+0.15,Math.PI*2-0.15); cctx.stroke();
+        cctx.shadowColor='#ff7700'; cctx.shadowBlur=14;
+        cctx.strokeStyle='rgba(255,120,0,0.5)'; cctx.lineWidth=2;
+        cctx.beginPath(); cctx.arc(0,0,ballR,0,Math.PI*2); cctx.stroke();
+        cctx.restore();
+
+        // Player label near ball
+        cctx.save();
+        cctx.font="bold 11px 'Rajdhani',sans-serif";
+        cctx.fillStyle='rgba(255,255,255,0.85)';
+        cctx.textAlign='center';
+        cctx.fillText(s.playerName, x, y-20);
+        cctx.restore();
+
+        if (s.t >= 1) {
+            // Basket flash
+            cctx.save();
+            const gr = cctx.createRadialGradient(s.tx,s.ty,0,s.tx,s.ty,40);
+            gr.addColorStop(0,s.pts===3?'rgba(255,215,0,0.9)':'rgba(0,243,255,0.8)');
+            gr.addColorStop(1,'transparent');
+            cctx.fillStyle=gr; cctx.beginPath(); cctx.arc(s.tx,s.ty,40,0,Math.PI*2); cctx.fill();
+            // MADE text
+            cctx.font="bold 22px 'Bebas Neue',sans-serif";
+            cctx.fillStyle=s.pts===3?'#ffd700':'#00f3ff';
+            cctx.textAlign='center';
+            cctx.fillText(s.pts===3?'THREE!':'BUCKET!', s.tx, s.ty-50);
+            cctx.restore();
+            s.active=false;
+        }
+        any=true;
+    }
+
+    if (any) { courtAnimId = requestAnimationFrame(courtRenderLoop); }
+    else {
+        courtAnimId=null;
+        // Leave the final frame visible (court + made indicator)
+    }
+}
+
+
 // =============================================================================
 // BOOT
 // =============================================================================
@@ -1109,5 +1626,34 @@ sysLog("Connecting to ESPN telemetry nodes...", "t-sys");
 setTimeout(ingestTelemetry, 800);
 setInterval(ingestTelemetry, 10000);
 </script>
+
+<!-- ESPN-STYLE COURT POPUP -->
+<div id="courtOverlay" onclick="closeCourtOverlay(event)">
+    <div class="court-popup" onclick="event.stopPropagation()">
+        <div class="court-popup-header">
+            <div class="court-popup-teams" id="cpTeams">
+                <img class="court-popup-logo" id="cpAwayLogo" src="" alt="">
+                <div class="court-popup-score">
+                    <span id="cpAwayScore">0</span>
+                    <span style="color:rgba(255,255,255,0.2)"> – </span>
+                    <span id="cpHomeScore">0</span>
+                </div>
+                <img class="court-popup-logo" id="cpHomeLogo" src="" alt="">
+            </div>
+            <div class="court-popup-clock" id="cpClock">Q1 · 12:00</div>
+            <button class="court-popup-close" onclick="closeCourtOverlay()">✕</button>
+        </div>
+        <canvas id="courtCanvas" width="860" height="420"></canvas>
+        <div class="score-event-banner" id="sebBanner" style="display:none">
+            <img class="seb-player-img" id="sebImg" src="" alt="">
+            <div class="seb-info">
+                <div class="seb-player-name" id="sebName">PLAYER NAME</div>
+                <div class="seb-play-text"  id="sebText">Three-point jumper</div>
+            </div>
+            <div class="seb-pts" id="sebPts">+2</div>
+        </div>
+    </div>
+</div>
+
 </body>
 </html>
