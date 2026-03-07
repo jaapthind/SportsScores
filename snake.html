@@ -3,223 +3,189 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ULTRADASH // THE MONOLITH</title>
+    <title>NEXUS APEX // ARENA MONOLITH</title>
     <style>
         :root {
-            /* Liquid Glass Physics */
-            --glass-bg: rgba(10, 15, 25, 0.6);
-            --glass-border: rgba(255, 255, 255, 0.15);
-            --glass-shine: rgba(255, 255, 255, 0.1);
-            --glass-blur: blur(50px) saturate(220%);
-            
-            /* Neon Spectrum */
+            --glass: rgba(10, 15, 25, 0.65);
+            --border: rgba(255, 255, 255, 0.18);
+            --shine: rgba(255, 255, 255, 0.12);
             --cyan: #00f3ff;
             --gold: #ffcf40;
             --green: #00ff88;
             --magenta: #ff007f;
             --red: #ff3333;
-            --text-main: #ffffff;
             --font-mono: 'JetBrains Mono', monospace;
-            
-            --transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+            --blur: blur(60px) saturate(210%);
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'SF Pro Display', sans-serif; user-select: none; }
-        body { background: #010103; color: var(--text-main); overflow: hidden; height: 100vh; position: relative; }
+        body { background: #010102; color: #fff; overflow: hidden; height: 100vh; position: relative; }
+
+        /* --- THE SHOT THEATER (ANIMATION OVERLAY) --- */
+        #shotTheater {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            z-index: 10000; pointer-events: none; display: none;
+            background: rgba(0,0,0,0.6); backdrop-filter: blur(10px);
+        }
+        #theaterCanvas { width: 100%; height: 100%; }
 
         /* --- AMBIENT PHYSICS --- */
         #particleCanvas, #goldRainCanvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; pointer-events: none; }
-        .orb { position: absolute; border-radius: 50%; filter: blur(140px); opacity: 0.35; z-index: 0; animation: fluid 25s infinite alternate ease-in-out; }
-        .orb-1 { width: 800px; height: 800px; background: #001f4d; top: -10%; left: -10%; }
-        .orb-2 { width: 600px; height: 600px; background: #3d004d; bottom: -10%; right: -10%; }
-        @keyframes fluid { 0% { transform: translate(0,0) scale(1); } 100% { transform: translate(120px, 80px) scale(1.1); } }
+        .orb { position: absolute; border-radius: 50%; filter: blur(140px); opacity: 0.3; z-index: 0; animation: drift 30s infinite alternate; }
+        .orb-1 { width: 900px; height: 900px; background: #001f4d; top: -10%; left: -10%; }
+        .orb-2 { width: 700px; height: 700px; background: #3d004d; bottom: -10%; right: -10%; }
+        @keyframes drift { 0% { transform: translate(0,0); } 100% { transform: translate(150px, 100px); } }
 
-        /* --- GLOBAL HEADER --- */
-        .nexus-header {
-            position: fixed; top: 0; left: 0; width: 100%; height: 85px;
+        /* --- HEADER & VAULT --- */
+        .header {
+            position: fixed; top: 0; left: 0; width: 100%; height: 90px;
             display: flex; justify-content: space-between; align-items: center;
-            padding: 0 40px; z-index: 1000; background: rgba(0,0,0,0.4);
-            backdrop-filter: blur(30px); border-bottom: 1px solid var(--glass-border);
+            padding: 0 50px; z-index: 1000; background: rgba(0,0,0,0.4);
+            backdrop-filter: blur(30px); border-bottom: 1px solid var(--border);
         }
-        .vault-stats { display: flex; align-items: center; gap: 15px; background: rgba(255,207,64,0.1); padding: 8px 25px; border-radius: 30px; border: 1px solid var(--gold); box-shadow: 0 0 20px rgba(255,207,64,0.1); }
-        .coin-icon { font-size: 1.5rem; animation: rotateCoin 3s infinite linear; }
-        @keyframes rotateCoin { 0% { transform: rotateY(0deg); } 100% { transform: rotateY(360deg); } }
+        .vault-capsule { display: flex; align-items: center; gap: 15px; background: rgba(255,207,64,0.1); padding: 10px 25px; border-radius: 40px; border: 1px solid var(--gold); box-shadow: 0 0 30px rgba(255,207,64,0.1); }
+        #goldCount { font-family: var(--font-mono); font-weight: 900; color: var(--gold); font-size: 1.6rem; }
 
-        /* --- MASTER LAYOUT --- */
-        .monolith-grid {
-            display: grid; grid-template-columns: 420px 1fr; gap: 25px;
-            padding: 110px 25px 25px 25px; height: 100vh; position: relative; z-index: 10;
+        /* --- MONOLITH GRID --- */
+        .master-layout {
+            display: grid; grid-template-columns: 440px 1fr; gap: 30px;
+            padding: 120px 30px 30px 30px; height: 100vh; position: relative; z-index: 10;
         }
 
-        .glass-panel {
-            background: var(--glass-bg); backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur);
-            border: 1px solid var(--glass-border); border-top: 1px solid var(--glass-shine);
-            border-radius: 40px; box-shadow: 0 50px 100px rgba(0,0,0,0.7);
+        .panel {
+            background: var(--glass); backdrop-filter: var(--blur); -webkit-backdrop-filter: var(--blur);
+            border: 1px solid var(--border); border-top: 1px solid var(--shine);
+            border-radius: 40px; box-shadow: 0 60px 120px rgba(0,0,0,0.8);
             display: flex; flex-direction: column; overflow: hidden;
         }
 
-        .panel-head { padding: 30px; border-bottom: 1px solid var(--glass-border); background: rgba(0,0,0,0.2); }
-        .panel-body { padding: 30px; overflow-y: auto; flex-grow: 1; display: flex; flex-direction: column; gap: 30px; }
+        .panel-head { padding: 35px; border-bottom: 1px solid var(--border); background: rgba(0,0,0,0.2); }
+        .panel-body { padding: 30px; overflow-y: auto; flex-grow: 1; display: flex; flex-direction: column; gap: 35px; }
 
-        /* --- COMMAND CENTER --- */
-        .input-glass {
-            width: 100%; background: rgba(0,0,0,0.4); border: 1px solid var(--glass-border);
-            color: #fff; padding: 22px; border-radius: 20px; outline: none; font-size: 1.1rem;
-        }
-        .btn-apex {
-            background: linear-gradient(135deg, rgba(255,255,255,0.1), transparent);
-            border: 1px solid var(--glass-border); color: #fff; padding: 22px;
-            border-radius: 20px; font-weight: 900; cursor: pointer; text-transform: uppercase;
-            letter-spacing: 2px; transition: 0.3s;
-        }
-        .btn-apex:hover { background: var(--cyan); color: #000; box-shadow: 0 0 40px var(--cyan); transform: translateY(-3px); }
+        /* --- COMMS & SOUNDBOARD --- */
+        .glass-input { width: 100%; background: rgba(0,0,0,0.4); border: 1px solid var(--border); color: #fff; padding: 25px; border-radius: 20px; font-size: 1.2rem; outline: none; transition: 0.3s; }
+        .glass-input:focus { border-color: var(--cyan); box-shadow: 0 0 30px rgba(0,243,255,0.2); }
+        
+        .btn-apex { background: linear-gradient(135deg, rgba(255,255,255,0.1), transparent); border: 1px solid var(--border); color: #fff; padding: 25px; border-radius: 20px; font-weight: 900; cursor: pointer; text-transform: uppercase; letter-spacing: 2px; }
+        .btn-apex:hover { background: var(--cyan); color: #000; box-shadow: 0 0 50px var(--cyan); transform: translateY(-3px); }
 
-        .soundboard { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-        .sb-btn { background: rgba(0,0,0,0.3); border: 1px solid var(--glass-border); color: #888; padding: 18px; border-radius: 15px; font-size: 0.75rem; font-weight: 800; cursor: pointer; text-align: center; }
-        .sb-btn:hover { background: rgba(0,243,255,0.1); color: var(--cyan); }
+        .sb-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .sb-btn { background: rgba(0,0,0,0.3); border: 1px solid var(--border); color: #777; padding: 20px; border-radius: 18px; font-size: 0.8rem; font-weight: 800; cursor: pointer; text-align: center; }
+        .sb-btn:hover { background: rgba(0,243,255,0.1); color: var(--cyan); border-color: var(--cyan); }
 
-        /* --- PRO-SPORTS TELEMETRY --- */
-        .matrix-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 25px; }
+        /* --- OMNI-SPORTS MATRIX --- */
+        .matrix-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)); gap: 30px; }
         
         .game-card {
-            background: rgba(255,255,255,0.02); border: 1px solid var(--glass-border); border-radius: 34px;
-            padding: 30px; transition: 0.4s; cursor: pointer; position: relative; overflow: hidden;
+            background: rgba(255,255,255,0.02); border: 1px solid var(--border); border-radius: 36px;
+            padding: 35px; transition: 0.4s; cursor: pointer; position: relative; overflow: hidden;
         }
-        .game-card:hover { transform: translateY(-10px); border-color: var(--cyan); background: rgba(255,255,255,0.05); }
+        .game-card:hover { transform: translateY(-10px); border-color: var(--cyan); background: rgba(255,255,255,0.04); }
 
-        /* Accurate Possession Glow */
-        .possession-glow { box-shadow: 0 0 30px var(--cyan); border: 2.5px solid var(--cyan) !important; }
-
-        /* Game Break Overlays */
-        .break-alert {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(255, 0, 127, 0.15); display: none; align-items: center; justify-content: center;
-            z-index: 10; pointer-events: none;
-        }
-        .break-alert.active { display: flex; animation: pulseRed 2s infinite; }
-        @keyframes pulseRed { 0%, 100% { opacity: 0.4; } 50% { opacity: 0.9; } }
-        .alert-tag { background: var(--magenta); color: #fff; padding: 6px 16px; border-radius: 10px; font-weight: 900; letter-spacing: 2px; }
-
-        .l-badge { position: absolute; top: -12px; left: 30px; background: #fff; color: #000; padding: 5px 14px; border-radius: 10px; font-size: 0.75rem; font-weight: 900; }
+        .l-badge { position: absolute; top: -14px; left: 35px; background: #fff; color: #000; padding: 6px 16px; border-radius: 12px; font-size: 0.8rem; font-weight: 900; }
         
-        .team-line { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
-        .team-meta { display: flex; align-items: center; gap: 15px; }
-        .logo-frame { width: 55px; height: 55px; background: #fff; border-radius: 50%; padding: 7px; border: 1px solid transparent; transition: 0.3s; }
-        .logo-img { width: 100%; height: 100%; object-fit: contain; }
-        .score-num { font-size: 2.8rem; font-weight: 900; font-family: var(--font-mono); }
+        .team-line { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .logo-frame { width: 60px; height: 60px; background: #fff; border-radius: 50%; padding: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.4); border: 2px solid transparent; }
+        .possession-glow { border-color: var(--cyan); box-shadow: 0 0 30px var(--cyan); }
+        .score-val { font-size: 3rem; font-weight: 900; font-family: var(--font-mono); }
 
-        .bet-row {
-            margin-top: 20px; padding-top: 20px; border-top: 1px dashed var(--glass-border);
-            display: flex; gap: 10px;
-        }
-        .bet-btn { flex: 1; padding: 12px; border-radius: 12px; border: 1px solid var(--glass-border); background: rgba(0,0,0,0.4); color: #fff; font-size: 0.75rem; font-weight: 900; cursor: pointer; }
-        .bet-btn.active { background: var(--gold); color: #000; border-color: var(--gold); }
+        .bet-engine { margin-top: 25px; padding-top: 25px; border-top: 1px dashed var(--border); display: flex; gap: 12px; }
+        .bet-btn { flex: 1; padding: 15px; border-radius: 15px; border: 1px solid var(--border); background: rgba(0,0,0,0.3); color: #fff; font-weight: 900; cursor: pointer; transition: 0.3s; }
+        .bet-btn.selected { background: var(--gold); color: #000; border-color: var(--gold); }
 
-        .card-footer {
-            margin-top: 20px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.05);
-            display: flex; justify-content: space-between; align-items: center;
-        }
-        .live-clock { font-family: var(--font-mono); font-size: 1.2rem; font-weight: 900; color: var(--cyan); }
-        .play-by-play { font-size: 0.7rem; color: #666; font-style: italic; max-width: 60%; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+        .card-foot { display: flex; justify-content: space-between; align-items: center; margin-top: 25px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.05); }
+        .clock-live { font-family: var(--font-mono); font-size: 1.3rem; font-weight: 900; color: var(--cyan); }
+        .last-play { font-size: 0.75rem; color: #666; font-style: italic; max-width: 65%; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
 
-        /* --- TERMINAL --- */
-        #termLog { background: rgba(0,0,0,0.5); border-radius: 25px; padding: 25px; font-family: var(--font-mono); font-size: 0.8rem; height: 200px; overflow-y: auto; color: #444; border: 1px solid var(--glass-border); }
-        .t-cyan { color: var(--cyan); } .t-gold { color: var(--gold); }
+        /* --- SCORING FLASH --- */
+        @keyframes scoreFlare { 0% { color: #fff; } 50% { color: var(--green); transform: scale(1.4); text-shadow: 0 0 30px var(--green); } 100% { color: #fff; } }
+        .score-flare { animation: scoreFlare 2s ease-out; }
+
+        #term { background: rgba(0,0,0,0.5); border-radius: 25px; padding: 25px; font-family: var(--font-mono); font-size: 0.8rem; height: 220px; overflow-y: auto; color: #444; border: 1px solid var(--border); }
+        .t-cyan { color: var(--cyan); }
     </style>
 </head>
 <body>
 
+    <div id="shotTheater"><canvas id="theaterCanvas"></canvas></div>
     <div class="ambient-layer"><div class="orb orb-1"></div><div class="orb orb-2"></div></div>
     <canvas id="particleCanvas"></canvas>
     <canvas id="goldRainCanvas"></canvas>
 
-    <header class="nexus-header">
-        <div style="font-size: 1.8rem; font-weight: 900; letter-spacing: -1.5px;">NEXUS <span style="color:var(--cyan);">APEX v27</span></div>
-        <div class="vault-stats">
-            <span class="coin-icon">🪙</span>
-            <span id="goldCounter" style="font-family:var(--font-mono); font-weight:900; color:var(--gold); font-size: 1.3rem;">0</span>
-        </div>
+    <header class="header">
+        <div style="font-size: 1.8rem; font-weight: 900; letter-spacing: -1.5px;">NEXUS <span style="color:var(--cyan);">ARENA v28</span></div>
+        <div class="vault-capsule">🪙 <span id="goldCount">0</span></div>
     </header>
 
-    <div class="monolith-grid">
-        
-        <div class="glass-panel">
+    <div class="master-layout">
+        <div class="panel">
             <div class="panel-head">
-                <div style="font-size: 1.5rem; font-weight: 900;">Nexus Terminal</div>
-                <div id="sysTime" style="color:var(--cyan); font-size: 0.9rem; font-weight: 800; margin-top: 5px;">00:00:00.000</div>
+                <div style="font-size: 1.5rem; font-weight: 900;">Broadcast Node</div>
+                <div id="sysClock" style="color:var(--cyan); font-weight: 900; font-size: 0.9rem; margin-top: 5px;">00:00:00.000</div>
             </div>
             <div class="panel-body">
-                <input type="text" id="cmdInput" class="input-glass" placeholder="Initiate transmission...">
-                <button class="btn-apex" onclick="dispatchUplink()">Transmit to House</button>
-
-                <div class="soundboard">
-                    <button class="sb-btn" onclick="macro('Attention, dinner is ready downstairs.')">🍕 Dinner</button>
-                    <button class="sb-btn" onclick="macro('Bedtime protocol starting now.')">🌙 Bedtime</button>
-                    <button class="sb-btn" onclick="macro('Study session in progress. Do not disturb.')">📚 Study</button>
-                    <button class="sb-btn" onclick="macro('Wake up! Time for Berkeley City College.')">☀️ Wake Up</button>
-                    <button class="sb-btn" onclick="macro('Security Alert: Check the front door.')">🚨 Alert</button>
-                    <button class="sb-btn" onclick="macro('Go Seahawks! Massive touchdown!')">🏈 Seahawks</button>
+                <input type="text" id="cmdInput" class="glass-input" placeholder="Transmission payload...">
+                <button class="btn-apex" onclick="sendBroadcast()">Execute Relay</button>
+                
+                <div class="sb-grid">
+                    <button class="sb-btn" onclick="macro('Attention, it is now bedtime.')">🌙 Bedtime</button>
+                    <button class="sb-btn" onclick="macro('Dinner is served! Come down.')">🍕 Dinner</button>
+                    <button class="sb-btn" onclick="macro('Study mode starting now.')">📚 Study</button>
+                    <button class="sb-btn" onclick="macro('Wake up! Berkeley class time.')">☀️ Wake Up</button>
+                    <button class="sb-btn" onclick="macro('Security Alert: Check the door.')">🚨 Alert</button>
+                    <button class="sb-btn" onclick="macro('Go Seahawks! Seahawks touchdown!')">🏈 Seahawks</button>
                 </div>
 
-                <div id="termLog">
-                    <div>> OMEGA CORE v27.0 INITIALIZED.</div>
-                    <div class="t-cyan">> GOOGLE ROUTINE SYNC: ACTIVE.</div>
+                <div id="term">
+                    <div>> APEX KERNEL v28.0 INITIALIZED.</div>
+                    <div class="t-cyan">> THEATER ENGINE: READY.</div>
                 </div>
             </div>
         </div>
 
-        <div class="glass-panel">
+        <div class="panel">
             <div class="panel-head" style="display:flex; justify-content:space-between; align-items:center;">
-                <div style="font-size: 1.5rem; font-weight: 900;">OMNI-Telemetry</div>
-                <div style="font-size: 0.8rem; color:var(--green); font-weight:900; letter-spacing: 1px;">● LIVE STREAM ACTIVE</div>
+                <div style="font-size: 1.5rem; font-weight: 900;">OMNI-Stream</div>
+                <div style="font-size: 0.8rem; color:var(--green); font-weight: 900;">● SATELLITE LINK ACTIVE</div>
             </div>
             <div class="panel-body">
                 <div class="matrix-grid" id="matrix">
-                    <div style="grid-column: 1/-1; text-align: center; padding: 100px; color: #444;">SYNCING WITH ESPN SATELLITE...</div>
+                    <div style="grid-column: 1/-1; text-align: center; padding: 100px; color: #444;">SYNCING REAL-TIME DATA...</div>
                 </div>
             </div>
         </div>
-
     </div>
 
     <script>
         // 🔴 PASTE WEBHOOK URL 🔴
         const TARGET = "https://pets-hdtv-enormous-objects.trycloudflare.com/endpoint/@scrypted/webhook/public/33/fe2475e0d68cf025/turnOn";
         
-        let goldVault = parseInt(localStorage.getItem('apexGold')) || 0;
-        let localClocks = {}; // Predictive countdowns
-        let predictions = {}; 
-        let scoreMem = {};
+        let gold = parseInt(localStorage.getItem('apexGold')) || 0;
+        let scoreState = {};
+        let localClocks = {};
+        let prediction = {};
 
-        document.getElementById('goldCounter').innerText = goldVault;
+        document.getElementById('goldCount').innerText = gold;
 
-        function addLog(m, c="") {
-            const l = document.getElementById('termLog');
-            l.innerHTML += `<div class="${c}">> ${new Date().toLocaleTimeString()}: ${m}</div>`;
-            l.scrollTop = l.scrollHeight;
-        }
-
-        async function dispatchUplink() {
+        async function sendBroadcast() {
             const val = document.getElementById('cmdInput').value;
             if(!val) return;
-            addLog(`Uplink: ${val}`, "t-cyan");
             try {
                 await fetch(TARGET, { method: 'GET', mode: 'no-cors' });
-                setTimeout(() => fetch(TARGET, { method: 'GET', mode: 'no-cors' }), 450);
-                addLog(`Success: Broadcast Fired.`);
-            } catch(e) { addLog(`Error: Connection Failed.`); }
+                setTimeout(() => fetch(TARGET, { method: 'GET', mode: 'no-cors' }), 400);
+                document.getElementById('term').innerHTML += `<br>> Relay Sent: ${val}`;
+            } catch(e){}
             document.getElementById('cmdInput').value = "";
         }
-        function macro(m) { document.getElementById('cmdInput').value = m; dispatchUplink(); }
+        function macro(m) { document.getElementById('cmdInput').value = m; sendBroadcast(); }
 
         const APIS = [
             { id: "NBA", url: "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/scoreboard" },
             { id: "NCAA", url: "https://site.api.espn.com/apis/site/v2/sports/basketball/mens-college-basketball/scoreboard" },
-            { id: "MLB", url: "https://site.api.espn.com/apis/site/v2/sports/baseball/mlb/scoreboard" },
-            { id: "NHL", url: "https://site.api.espn.com/apis/site/v2/sports/hockey/nhl/scoreboard" }
+            { id: "MLB", url: "https://site.api.espn.com/apis/site/v2/sports/baseball/mlb/scoreboard" }
         ];
 
-        async function pollTelemetry() {
+        async function poll() {
             let active = [];
             for (let api of APIS) {
                 try {
@@ -229,77 +195,138 @@
                             let c = g.competitions[0];
                             let game = {
                                 id: g.id, l: api.id,
-                                status: g.status.type.detail,
-                                rawClock: g.status.displayClock, 
-                                situation: c.situation || null,
+                                clockRaw: g.status.displayClock,
+                                play: c.situation && c.situation.lastPlay ? c.situation.lastPlay.text : "Action in progress...",
+                                possession: c.situation ? c.situation.possession : null,
                                 h: { id: c.competitors[0].id, n: c.competitors[0].team.shortDisplayName, s: parseInt(c.competitors[0].score), i: c.competitors[0].team.logo },
                                 a: { id: c.competitors[1].id, n: c.competitors[1].team.shortDisplayName, s: parseInt(c.competitors[1].score), i: c.competitors[1].team.logo }
                             };
                             active.push(game);
-                            syncClock(game.id, game.rawClock);
+                            updateLocalClock(game.id, game.clockRaw);
                         }
                     });
                 } catch(e){}
             }
-            renderMatrix(active);
+            render(active);
         }
 
-        function renderMatrix(games) {
+        function render(games) {
             const m = document.getElementById('matrix');
-            if(games.length === 0) { m.innerHTML = "<div style='grid-column:1/-1; text-align:center; padding:50px; color:#444;'>AWAITING LIVE GAMES...</div>"; return; }
+            if(games.length === 0) { m.innerHTML = "NO LIVE TRANSMISSIONS."; return; }
             
             m.innerHTML = games.map(g => {
-                const pred = predictions[g.id] || null;
-                const isBreak = g.status.toLowerCase().includes("timeout") || g.status.toLowerCase().includes("halftime") || g.status.toLowerCase().includes("end");
-                const hasBall = g.situation && g.situation.possession;
-
+                const pred = prediction[g.id] || null;
                 return `
                 <div class="game-card">
-                    <div class="break-alert ${isBreak ? 'active' : ''}"><div class="alert-tag">${g.status.toUpperCase()}</div></div>
                     <div class="l-badge">${g.l}</div>
-                    
                     <div class="team-line">
-                        <div class="team-meta">
-                            <div class="logo-frame ${hasBall == g.a.id ? 'possession-glow' : ''}"><img src="${g.a.i}" class="logo-img"></div>
+                        <div style="display:flex; align-items:center; gap:20px;">
+                            <div class="logo-frame ${g.possession == g.a.id ? 'possession-glow' : ''}"><img src="${g.a.i}" style="width:100%;height:100%;object-fit:contain;"></div>
                             <strong>${g.a.n}</strong>
                         </div>
-                        <div class="score-num" id="s_${g.id}_a">${g.a.s}</div>
+                        <div class="score-val" id="s_${g.id}_a">${g.a.s}</div>
                     </div>
-                    
                     <div class="team-line">
-                        <div class="team-meta">
-                            <div class="logo-frame ${hasBall == g.h.id ? 'possession-glow' : ''}"><img src="${g.h.i}" class="logo-img"></div>
+                        <div style="display:flex; align-items:center; gap:20px;">
+                            <div class="logo-frame ${g.possession == g.h.id ? 'possession-glow' : ''}"><img src="${g.h.i}" style="width:100%;height:100%;object-fit:contain;"></div>
                             <strong>${g.h.n}</strong>
                         </div>
-                        <div class="score-num" id="s_${g.id}_h">${g.h.s}</div>
+                        <div class="score-val" id="s_${g.id}_h">${g.h.s}</div>
                     </div>
-
-                    <div class="bet-row">
-                        <button class="bet-btn ${pred === 'a' ? 'active' : ''}" onclick="predict('${g.id}', 'a')">${g.a.n}</button>
-                        <button class="bet-btn ${pred === 'h' ? 'active' : ''}" onclick="predict('${g.id}', 'h')">${g.h.n}</button>
+                    <div class="bet-engine">
+                        <button class="bet-btn ${pred === 'a' ? 'selected' : ''}" onclick="predict('${g.id}', 'a')">${g.a.n}</button>
+                        <button class="bet-btn ${pred === 'h' ? 'selected' : ''}" onclick="predict('${g.id}', 'h')">${g.h.n}</button>
                     </div>
-
-                    <div class="card-footer">
-                        <div class="live-clock" id="clock_${g.id}">${g.rawClock}</div>
-                        <div class="play-by-play">${g.situation && g.situation.lastPlay ? g.situation.lastPlay.text : ''}</div>
+                    <div class="card-foot">
+                        <div class="clock-live" id="clock_${g.id}">${g.clockRaw}</div>
+                        <div class="last-play">${g.play}</div>
                     </div>
                 </div>
             `}).join('');
 
-            // CHECK WINNERS
+            // CHECK FOR SCORE CHANGE
             games.forEach(g => {
-                if(scoreMem[`${g.id}_a`] !== undefined && g.a.s > scoreMem[`${g.id}_a`]) handleScore(g.id, 'a');
-                if(scoreMem[`${g.id}_h`] !== undefined && g.h.s > scoreMem[`${g.id}_h`]) handleScore(g.id, 'h');
-                scoreMem[`${g.id}_a`] = g.a.s; scoreMem[`${g.id}_h`] = g.h.s;
+                if(scoreState[`${g.id}_a`] !== undefined && g.a.s > scoreState[`${g.id}_a`]) handleScore(g, 'a');
+                if(scoreState[`${g.id}_h`] !== undefined && g.h.s > scoreState[`${g.id}_h`]) handleScore(g, 'h');
+                scoreState[`${g.id}_a`] = g.a.s; scoreState[`${g.id}_h`] = g.h.s;
             });
         }
 
-        // --- PREDICTIVE CLOCK LOGIC ---
-        function syncClock(id, raw) {
+        // --- THEATER ENGINE (PHYSICS ANIMATION) ---
+        const tCanvas = document.getElementById('theaterCanvas');
+        const tCtx = tCanvas.getContext('2d');
+        
+        function handleScore(game, side) {
+            // Trigger Gold Winnings
+            if(prediction[game.id] === side) {
+                gold++; localStorage.setItem('apexGold', gold);
+                document.getElementById('goldCount').innerText = gold;
+                rainGold();
+            }
+            prediction[game.id] = null;
+
+            // Trigger Animation Theater
+            if(game.l === "NBA" || game.l === "NCAA") {
+                const distMatch = game.play.match(/(\d+)-foot/);
+                const distance = distMatch ? parseInt(distMatch[1]) : (game.play.toLowerCase().includes("dunk") || game.play.toLowerCase().includes("layup") ? 2 : 15);
+                triggerShotAnimation(distance);
+            }
+        }
+
+        function triggerShotAnimation(feet) {
+            const stage = document.getElementById('shotTheater');
+            stage.style.display = 'block';
+            tCanvas.width = window.innerWidth; tCanvas.height = window.innerHeight;
+
+            const hoopX = tCanvas.width * 0.8;
+            const hoopY = tCanvas.height * 0.3;
+            // Scale: 1 foot = 15 pixels. Base distance starts from hoop.
+            const shooterX = hoopX - (feet * 20);
+            const shooterY = tCanvas.height * 0.7;
+
+            let ball = { x: shooterX, y: shooterY, vx: 0, vy: 0, active: false };
+            let frame = 0;
+
+            function animate() {
+                tCtx.clearRect(0,0,tCanvas.width,tCanvas.height);
+                
+                // Draw Court Line
+                tCtx.strokeStyle = "rgba(255,255,255,0.1)"; tCtx.lineWidth = 5;
+                tCtx.beginPath(); tCtx.moveTo(0, tCanvas.height * 0.8); tCtx.lineTo(tCanvas.width, tCanvas.height * 0.8); tCtx.stroke();
+
+                // Draw Hoop
+                tCtx.fillStyle = varColor('--magenta'); tCtx.fillRect(hoopX, hoopY, 10, 80); // Backboard
+                tCtx.strokeStyle = "#fff"; tCtx.beginPath(); tCtx.arc(hoopX - 30, hoopY + 60, 20, 0, Math.PI); tCtx.stroke(); // Rim
+
+                // Draw Shooter Silhouette
+                tCtx.fillStyle = varColor('--cyan');
+                const jumpOffset = frame > 20 && frame < 50 ? -40 : 0;
+                tCtx.fillRect(shooterX - 15, shooterY - 60 + jumpOffset, 30, 60); // Body
+                tCtx.beginPath(); tCtx.arc(shooterX, shooterY - 75 + jumpOffset, 12, 0, Math.PI*2); tCtx.fill(); // Head
+
+                // Ball Physics
+                if(frame === 30) { ball.active = true; ball.vx = (hoopX - 35 - shooterX) / 60; ball.vy = -18; }
+                if(ball.active) {
+                    ball.x += ball.vx; ball.y += ball.vy; ball.vy += 0.5; // Gravity
+                    tCtx.fillStyle = varColor('--gold');
+                    tCtx.beginPath(); tCtx.arc(ball.x, ball.y, 12, 0, Math.PI*2); tCtx.fill();
+                }
+
+                frame++;
+                if(frame < 120) requestAnimationFrame(animate);
+                else { stage.style.display = 'none'; }
+            }
+            animate();
+        }
+
+        function varColor(name) { return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
+
+        // --- PREDICTIVE CLOCK ---
+        function updateLocalClock(id, raw) {
             if(!raw || !raw.includes(":")) return;
-            const pts = raw.split(":");
-            let totalSecs = (parseInt(pts[0]) * 60) + parseInt(pts[1]);
-            if(!localClocks[id] || Math.abs(localClocks[id] - totalSecs) > 5) localClocks[id] = totalSecs;
+            const p = raw.split(":");
+            let total = (parseInt(p[0]) * 60) + parseInt(p[1]);
+            if(!localClocks[id] || Math.abs(localClocks[id] - total) > 5) localClocks[id] = total;
         }
 
         setInterval(() => {
@@ -309,26 +336,15 @@
                     const m = Math.floor(localClocks[id] / 60);
                     const s = String(localClocks[id] % 60).padStart(2, '0');
                     const el = document.getElementById(`clock_${id}`);
-                    if(el && !el.innerText.includes("Time") && !el.innerText.includes("Half")) el.innerText = `${m}:${s}`;
+                    if(el && !el.innerText.includes("End") && !el.innerText.includes("Half")) el.innerText = `${m}:${s}`;
                 }
             }
         }, 1000);
 
-        // --- BETTING ENGINE ---
-        function predict(gid, side) { predictions[gid] = side; pollTelemetry(); }
-        function handleScore(gid, side) {
-            if(predictions[gid] === side) {
-                goldVault++; localStorage.setItem('apexGold', goldVault);
-                document.getElementById('goldCounter').innerText = goldVault;
-                addLog(`JACKPOT! Prediction correct. +1 Coin.`, "t-gold");
-                rainGold();
-            }
-            predictions[gid] = null;
-        }
+        function predict(gid, side) { prediction[gid] = side; poll(); }
 
-        // --- REWARD ANIMATION ---
-        const rC = document.getElementById('goldRainCanvas');
-        const rX = rC.getContext('2d');
+        // Reward Rain
+        const rC = document.getElementById('goldRainCanvas'); const rX = rC.getContext('2d');
         let goldArr = [];
         function rainGold() {
             rC.width = window.innerWidth; rC.height = window.innerHeight;
@@ -336,7 +352,7 @@
             animG();
         }
         function animG() {
-            rX.clearRect(0,0,rC.width,rC.height); rX.fillStyle = "#ffcf40";
+            rX.clearRect(0,0,rC.width,rC.height); rX.fillStyle = varColor('--gold');
             goldArr.forEach((c, i) => {
                 c.y += c.vy; c.r += c.vr;
                 rX.save(); rX.translate(c.x, c.y); rX.rotate(c.r);
@@ -346,26 +362,25 @@
             if(goldArr.length > 0) requestAnimationFrame(animG);
         }
 
-        // --- AMBIENT PARTICLES ---
-        const pC = document.getElementById('particleCanvas');
-        const pX = pC.getContext('2d');
+        // Ambient Particles
+        const pC = document.getElementById('particleCanvas'); const pX = pC.getContext('2d');
         let pts = [];
         function initP() {
             pC.width = window.innerWidth; pC.height = window.innerHeight;
-            for(let i=0; i<90; i++) pts.push({ x: Math.random()*pC.width, y: Math.random()*pC.height, s: Math.random()*2, vx: Math.random()*0.4-0.2, vy: Math.random()*0.4-0.2 });
+            for(let i=0; i<80; i++) pts.push({ x: Math.random()*pC.width, y: Math.random()*pC.height, s: Math.random()*2, vx: Math.random()*0.4-0.2, vy: Math.random()*0.4-0.2 });
         }
         function drawP() {
-            pX.clearRect(0,0,pC.width,pC.height); pX.fillStyle = "rgba(0, 243, 255, 0.35)";
+            pX.clearRect(0,0,pC.width,pC.height); pX.fillStyle = "rgba(0, 243, 255, 0.3)";
             pts.forEach(p => { p.x+=p.vx; p.y+=p.vy; if(p.x<0||p.x>pC.width) p.vx*=-1; if(p.y<0||p.y>pC.height) p.vy*=-1; pX.beginPath(); pX.arc(p.x, p.y, p.s, 0, Math.PI*2); pX.fill(); });
             requestAnimationFrame(drawP);
         }
         initP(); drawP();
 
         setInterval(() => {
-            const d = new Date(); document.getElementById('sysTime').innerText = d.toLocaleTimeString('en-US', {hour12:false}) + "." + d.getMilliseconds();
+            const d = new Date(); document.getElementById('sysClock').innerText = d.toLocaleTimeString('en-US', {hour12:false}) + "." + d.getMilliseconds();
         }, 50);
 
-        pollTelemetry(); setInterval(pollTelemetry, 15000);
+        poll(); setInterval(poll, 15000);
     </script>
 </body>
 </html>
